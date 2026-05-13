@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMU2CLAW Skills — Fitipower IC Test AI Skill Pack</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2128;
+    --border: #30363d;
+    --accent: #f78166;
+    --accent2: #79c0ff;
+    --accent3: #56d364;
+    --accent4: #d2a8ff;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --tag-bg: #21262d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 48px 24px 40px;
+    text-align: center;
+    background: linear-gradient(180deg, #1a1f27 0%, var(--bg) 100%);
+  }
+  .logo { font-size: 2.8rem; margin-bottom: 12px; }
+  header h1 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  header h1 span { color: var(--accent); }
+  .tagline {
+    margin: 10px auto 0;
+    max-width: 560px;
+    color: var(--text-dim);
+    font-size: 0.97rem;
+  }
+  .badges { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--tag-bg); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 12px; font-size: 0.82rem; color: var(--text-dim);
+  }
+  .badge-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .dot-green { background: var(--accent3); }
+  .dot-blue  { background: var(--accent2); }
+  .dot-purple{ background: var(--accent4); }
+
+  /* ── Install banner ── */
+  .install-banner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 32px auto;
+    max-width: 860px;
+    padding: 24px 28px;
+  }
+  .install-banner h2 { font-size: 1rem; color: var(--text-dim); font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .install-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .tab-btn {
+    background: var(--tag-bg); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text-dim); cursor: pointer; font-size: 0.82rem; padding: 5px 14px;
+    transition: all 0.15s;
+  }
+  .tab-btn.active { background: var(--accent2); border-color: var(--accent2); color: #0d1117; font-weight: 600; }
+  .install-code {
+    background: #010409; border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 18px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.85rem;
+    color: var(--accent3); overflow-x: auto; white-space: nowrap;
+  }
+  .install-note { margin-top: 10px; font-size: 0.82rem; color: var(--text-dim); }
+  .install-note code { background: var(--tag-bg); border-radius: 4px; padding: 1px 6px; font-size: 0.8rem; color: var(--accent2); }
+
+  /* ── Main ── */
+  main { max-width: 1120px; margin: 0 auto; padding: 0 24px 60px; }
+
+  /* ── Group section ── */
+  .group { margin-bottom: 52px; }
+  .group-header {
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 24px;
+  }
+  .group-icon { font-size: 1.5rem; }
+  .group-title { font-size: 1.15rem; font-weight: 700; color: var(--text); }
+  .group-count {
+    background: var(--tag-bg); border: 1px solid var(--border); border-radius: 12px;
+    font-size: 0.78rem; color: var(--text-dim); padding: 2px 9px;
+  }
+
+  /* ── Skill grid ── */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 22px; display: flex; flex-direction: column; gap: 12px;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .card:hover { border-color: #4d565e; box-shadow: 0 4px 16px rgba(0,0,0,0.35); }
+
+  .card-top { display: flex; align-items: flex-start; gap: 10px; }
+  .card-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+  .card-name { font-size: 0.92rem; font-weight: 700; color: var(--text); word-break: break-all; }
+  .card-slug { font-size: 0.75rem; color: var(--text-dim); font-family: monospace; margin-top: 2px; }
+
+  .card-desc { font-size: 0.84rem; color: var(--text-dim); flex: 1; }
+
+  .card-footer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .tag {
+    background: var(--tag-bg); border: 1px solid var(--border); border-radius: 4px;
+    font-size: 0.72rem; color: var(--text-dim); padding: 2px 8px;
+  }
+  .tag-green  { border-color: #2ea04326; background: #12261e; color: var(--accent3); }
+  .tag-blue   { border-color: #1f6feb40; background: #0d2036; color: var(--accent2); }
+  .tag-purple { border-color: #8b5cf640; background: #1c1536; color: var(--accent4); }
+
+  .copy-btn {
+    margin-left: auto; background: var(--tag-bg); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text-dim); cursor: pointer; font-size: 0.74rem;
+    padding: 4px 10px; transition: all 0.15s; white-space: nowrap;
+  }
+  .copy-btn:hover { background: var(--surface2); color: var(--text); border-color: #4d565e; }
+  .copy-btn.copied { color: var(--accent3); border-color: var(--accent3); }
+
+  /* ── Flow diagram ── */
+  .flow-section {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 28px 32px; margin-bottom: 48px;
+  }
+  .flow-section h2 { font-size: 1rem; font-weight: 700; margin-bottom: 20px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+  .flow {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0;
+    font-size: 0.84rem;
+  }
+  .flow-node {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 16px; text-align: center; min-width: 120px;
+  }
+  .flow-node .fn-label { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 3px; }
+  .flow-node .fn-name  { font-weight: 600; color: var(--text); font-size: 0.85rem; }
+  .flow-arrow { color: var(--text-dim); font-size: 1.1rem; padding: 0 8px; }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border); text-align: center;
+    padding: 28px 24px; color: var(--text-dim); font-size: 0.82rem;
+  }
+  footer a { color: var(--accent2); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.4rem; }
+    .install-banner { padding: 18px; }
+    .flow { flex-direction: column; align-items: flex-start; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ Header ══ -->
+<header>
+  <div class="logo">🦞</div>
+  <h1>PMU2CLAW <span>Skills</span></h1>
+  <p class="tagline">Fitipower IC Test Automation AI Skill Pack — TENJI · JD6628H · TIM2TENJI · Cadence AMS</p>
+  <div class="badges">
+    <span class="badge"><span class="badge-dot dot-green"></span>13 Skills</span>
+    <span class="badge"><span class="badge-dot dot-blue"></span>OpenClaw Compatible</span>
+    <span class="badge"><span class="badge-dot dot-blue"></span>Hermes Compatible</span>
+    <span class="badge"><span class="badge-dot dot-purple"></span>Claude Code Compatible</span>
+  </div>
+</header>
+
+<!-- ══ Install Banner ══ -->
+<div style="max-width:860px;margin:0 auto;padding:0 24px;">
+<div class="install-banner">
+  <h2>⚡ Quick Install</h2>
+  <div class="install-tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'hermes')">Hermes (tap)</button>
+    <button class="tab-btn" onclick="switchTab(this,'hermes-single')">Hermes (single)</button>
+    <button class="tab-btn" onclick="switchTab(this,'openclaw')">OpenClaw</button>
+    <button class="tab-btn" onclick="switchTab(this,'claude')">Claude Code</button>
+  </div>
+  <div id="tab-hermes" class="install-code"># 加入整包 repo 作為 skill source（推薦）
+hermes skills tap add pmu2claw-dev/pmu2claw-skills
+hermes skills install tenji-workflow</div>
+  <div id="tab-hermes-single" class="install-code" style="display:none"># 直接安裝單一 skill（URL 方式）
+hermes skills install https://raw.githubusercontent.com/pmu2claw-dev/pmu2claw-skills/main/tenji-workflow/SKILL.md</div>
+  <div id="tab-openclaw" class="install-code" style="display:none"># 複製 skill 到 workspace
+cp -r &lt;skill-name&gt; ~/.openclaw/workspace/skills/
+# 或使用 clawhub（如已發布）
+openclaw skills install &lt;slug&gt;</div>
+  <div id="tab-claude" class="install-code" style="display:none"># 在 CLAUDE.md 中加入 skill 路徑
+# 或直接讀取 SKILL.md 作為 context
+cat tenji-workflow/SKILL.md | claude --print -</div>
+  <p class="install-note">Repo: <code>https://github.com/pmu2claw-dev/pmu2claw-skills</code> &nbsp;·&nbsp; 每個 skill 都是獨立目錄，可單獨安裝</p>
+</div>
+</div>
+
+<!-- ══ Main ══ -->
+<main>
+
+<!-- Skill Flow -->
+<div class="flow-section">
+  <h2>🔄 Recommended Skill Chain</h2>
+  <div class="flow">
+    <div class="flow-node"><div class="fn-label">入口</div><div class="fn-name">protocol-knowledge</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">轉換</div><div class="fn-name">tenji-workflow</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">模板</div><div class="fn-name">tenji-ready</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">語法</div><div class="fn-name">tenji-guide</div></div>
+  </div>
+  <div class="flow" style="margin-top:14px;">
+    <div class="flow-node"><div class="fn-label">分析</div><div class="fn-name">jd6628h-*-analysis</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">讀取</div><div class="fn-name">tenji-sa-plan-intake</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">映射</div><div class="fn-name">sa-plan-to-mother-template</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="fn-label">產出</div><div class="fn-name">tenji-single-item-pipeline</div></div>
+  </div>
+</div>
+
+<!-- ══ Group 1: TENJI Core ══ -->
+<div class="group">
+  <div class="group-header">
+    <span class="group-icon">📋</span>
+    <span class="group-title">TENJI Core</span>
+    <span class="group-count">4 skills</span>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">📖</span>
+        <div>
+          <div class="card-name">TENJI Guide</div>
+          <div class="card-slug">tenji-guide</div>
+        </div>
+      </div>
+      <div class="card-desc">TENJI Excel 測試定義完整操作手冊。涵蓋所有語法指令、7 個 sheet 結構、TTR 平行指令、Macro、PseudoCode、AutoRun、Tenji2uvm 轉換流程。基於 REV 0.2.11。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">OpenClaw</span>
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">TENJI</span>
+        <span class="tag">語法</span>
+        <button class="copy-btn" onclick="copyInstall(this,'tenji-guide')">複製安裝指令</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">⚙️</span>
+        <div>
+          <div class="card-name">TENJI Workflow</div>
+          <div class="card-slug">tenji-workflow</div>
+        </div>
+      </div>
+      <div class="card-desc">將 TENJI 請求轉換為可執行的 workflow 決策。分類 4 種模式（語法/protocol-to-test/test-plan-to-event-chain/tenji-mapping），選擇對應輸出格式（summary/event chain/decision table/B~N mapping）。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">OpenClaw</span>
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">workflow</span>
+        <span class="tag">event chain</span>
+        <button class="copy-btn" onclick="copyInstall(this,'tenji-workflow')">複製安裝指令</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">📐</span>
+        <div>
+          <div class="card-name">TENJI Ready</div>
+          <div class="card-slug">tenji-ready</div>
+        </div>
+      </div>
+      <div class="card-desc">直接可填入 workbook 的測試欄位模板與 Excel 映射。涵蓋 PD、PPS、QC、AFC、FCP、UFCS、BC1.2、Apple、Type-C Current、PE、VOOC 共 11 種協議的 test fields 與 excel mapping。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">OpenClaw</span>
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">模板</span>
+        <span class="tag">Excel 映射</span>
+        <button class="copy-btn" onclick="copyInstall(this,'tenji-ready')">複製安裝指令</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">⚡</span>
+        <div>
+          <div class="card-name">Protocol Knowledge</div>
+          <div class="card-slug">protocol-knowledge</div>
+        </div>
+      </div>
+      <div class="card-desc">充電協議知識庫。解釋、比較、驗證 PD/PPS/QC/AFC/FCP/UFCS/BC1.2/Apple/USB-C Current/VOOC 及 D+/D- 多協議共存行為。作為 TENJI event chain 撰寫前的協議解讀層。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">OpenClaw</span>
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">充電協議</span>
+        <span class="tag">PD/PPS/QC</span>
+        <button class="copy-btn" onclick="copyInstall(this,'protocol-knowledge')">複製安裝指令</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ Group 2: JD6628H Analysis ══ -->
+<div class="group">
+  <div class="group-header">
+    <span class="group-icon">🔬</span>
+    <span class="group-title">JD6628H Analysis</span>
+    <span class="group-count">3 skills</span>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">🔌</span>
+        <div>
+          <div class="card-name">JD6628H 單電源模式分析</div>
+          <div class="card-slug">jd6628h-single-power-mode-analysis</div>
+        </div>
+      </div>
+      <div class="card-desc">分析 JD6628H 單電源模式 SA test-plan 情境，依 primary/secondary/tertiary port 角色、量測目標、5V-share vs 9V-recovery 意圖，推算 TENJI Test Note 映射。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">JD6628H</span>
+        <span class="tag">單電源</span>
+        <span class="tag">SA Plan</span>
+        <button class="copy-btn" onclick="copyInstall(this,'jd6628h-single-power-mode-analysis')">複製安裝指令</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">🔋</span>
+        <div>
+          <div class="card-name">JD6628H 雙電源模式分析</div>
+          <div class="card-slug">jd6628h-dual-power-mode-analysis</div>
+        </div>
+      </div>
+      <div class="card-desc">分析 JD6628H 雙電源模式 SA 情境，透過獨立 port bring-up、control-path switching、surviving-port validation 推算 TENJI Test Note 映射。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">JD6628H</span>
+        <span class="tag">雙電源</span>
+        <button class="copy-btn" onclick="copyInstall(this,'jd6628h-dual-power-mode-analysis')">複製安裝指令</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">🔍</span>
+        <div>
+          <div class="card-name">JD6628H 智能盲插模式分析</div>
+          <div class="card-slug">jd6628h-blind-insert-mode-analysis</div>
+        </div>
+      </div>
+      <div class="card-desc">分析 JD6628H 智能盲插模式 SA-plan 行，判斷是 basic blind-insert 還是 fallback→role-transfer 家族，保留 measured-node 與 control-path 證據供 TENJI 映射。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">JD6628H</span>
+        <span class="tag">盲插</span>
+        <span class="tag">OOXML</span>
+        <button class="copy-btn" onclick="copyInstall(this,'jd6628h-blind-insert-mode-analysis')">複製安裝指令</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ Group 3: SA Plan Pipeline ══ -->
+<div class="group">
+  <div class="group-header">
+    <span class="group-icon">🏗️</span>
+    <span class="group-title">SA Plan → TENJI Pipeline</span>
+    <span class="group-count">3 skills</span>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">📥</span>
+        <div>
+          <div class="card-name">SA Plan Intake</div>
+          <div class="card-slug">tenji-sa-plan-intake</div>
+        </div>
+      </div>
+      <div class="card-desc">以唯讀方式（OOXML）檢查 SA test plan Excel workbook。分類每個 sheet 的角色，識別 TENJI-ready sheets，在任何轉換前先回報結構。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">SA Plan</span>
+        <span class="tag">OOXML</span>
+        <span class="tag">分析</span>
+        <button class="copy-btn" onclick="copyInstall(this,'tenji-sa-plan-intake')">複製安裝指令</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">🗺️</span>
+        <div>
+          <div class="card-name">SA Plan → Mother Template</div>
+          <div class="card-slug">tenji-sa-plan-to-mother-template-mapping</div>
+        </div>
+      </div>
+      <div class="card-desc">將 SA test plan workbook 映射進 TENJI mother template。分類 testcase/spec/scenario sheets，展開 mode-matrix 行成 TENJI Test Note 行，原始檔唯讀保留。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">映射</span>
+        <span class="tag">Mother Template</span>
+        <button class="copy-btn" onclick="copyInstall(this,'tenji-sa-plan-to-mother-template-mapping')">複製安裝指令</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">🚀</span>
+        <div>
+          <div class="card-name">TENJI Single-Item Pipeline</div>
+          <div class="card-slug">tenji-single-item-pipeline</div>
+        </div>
+      </div>
+      <div class="card-desc">從 ANS workbook 提取已審查的 TENJI 單項規格，驗證 family rules，組裝 .xlsm，並驗證 roundtrip。有 ANS workbook 時使用此 skill；無則用 bootstrap_family.py。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">Pipeline</span>
+        <span class="tag">.xlsm</span>
+        <span class="tag">Roundtrip</span>
+        <button class="copy-btn" onclick="copyInstall(this,'tenji-single-item-pipeline')">複製安裝指令</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ Group 4: TIM2TENJI Dev ══ -->
+<div class="group">
+  <div class="group-header">
+    <span class="group-icon">⚙️</span>
+    <span class="group-title">TIM2TENJI Development</span>
+    <span class="group-count">2 skills</span>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">🔧</span>
+        <div>
+          <div class="card-name">TIM2TENJI Backend Feature Slice</div>
+          <div class="card-slug">tim2tenji-backend-feature-slice</div>
+        </div>
+      </div>
+      <div class="card-desc">以測試為合約，跨 domain/service/API/MCP 層擴充一個新的 TIM2TENJI 後端 feature slice，並用 targeted unittest suites 驗證。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">TIM2TENJI</span>
+        <span class="tag">後端</span>
+        <span class="tag">TDD</span>
+        <button class="copy-btn" onclick="copyInstall(this,'tim2tenji-backend-feature-slice')">複製安裝指令</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">🖥️</span>
+        <div>
+          <div class="card-name">TIM2TENJI Project Detail UI Slice</div>
+          <div class="card-slug">tim2tenji-project-detail-ui-slice</div>
+        </div>
+      </div>
+      <div class="card-desc">在 static app 中新增最小化的 TIM2TENJI 專案詳細 UI slice，先用 JS render tests 驗證，再做 browser smoke check。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">TIM2TENJI</span>
+        <span class="tag">前端</span>
+        <span class="tag">UI</span>
+        <button class="copy-btn" onclick="copyInstall(this,'tim2tenji-project-detail-ui-slice')">複製安裝指令</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ Group 5: EDA / Simulation ══ -->
+<div class="group">
+  <div class="group-header">
+    <span class="group-icon">📡</span>
+    <span class="group-title">EDA / Simulation</span>
+    <span class="group-count">1 skill</span>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-icon">🧪</span>
+        <div>
+          <div class="card-name">Cadence AMS Log Triage</div>
+          <div class="card-slug">cadence-ams-log-triage</div>
+        </div>
+      </div>
+      <div class="card-desc">分析大型 Cadence Xcelium/Spectre AMS xrun log，將 terminal analog failures 從 secondary noise 中分離，識別最可疑的 mixed-signal interface blocks，評估 run 失敗原因是收斂問題還是單純執行過慢。</div>
+      <div class="card-footer">
+        <span class="tag tag-blue">Hermes</span>
+        <span class="tag">Cadence</span>
+        <span class="tag">AMS</span>
+        <span class="tag">Xcelium</span>
+        <span class="tag">Spectre</span>
+        <button class="copy-btn" onclick="copyInstall(this,'cadence-ams-log-triage')">複製安裝指令</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <p>
+    <strong>pmu2claw-skills</strong> · Fitipower IC Test Automation AI Skill Pack ·
+    <a href="https://github.com/pmu2claw-dev/pmu2claw-skills" target="_blank">GitHub</a>
+  </p>
+  <p style="margin-top:6px;">Built with 🦞 by <a href="https://github.com/pmu2claw-dev" target="_blank">pmu2claw-dev</a> · MIT License</p>
+</footer>
+
+<script>
+const REPO = 'pmu2claw-dev/pmu2claw-skills';
+const RAW = `https://raw.githubusercontent.com/${REPO}/main`;
+
+function switchTab(btn, id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['hermes','hermes-single','openclaw','claude'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t === id ? '' : 'none';
+  });
+}
+
+function copyInstall(btn, slug) {
+  const text = `hermes skills install ${RAW}/${slug}/SKILL.md`;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ 已複製';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '複製安裝指令'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+</script>
+</body>
+</html>
