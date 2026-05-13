@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PMU2CLAW Skills — Fitipower IC Test AI Skill Pack</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
   :root {
     --bg: #0d1117;
@@ -106,8 +107,10 @@
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
     padding: 20px 22px; display: flex; flex-direction: column; gap: 12px;
     transition: border-color 0.18s, box-shadow 0.18s;
+    cursor: pointer;
   }
-  .card:hover { border-color: #4d565e; box-shadow: 0 4px 16px rgba(0,0,0,0.35); }
+  .card:hover { border-color: var(--accent2); box-shadow: 0 4px 20px rgba(121,192,255,0.12); }
+  .card.active { border-color: var(--accent2); box-shadow: 0 0 0 2px rgba(121,192,255,0.25); }
 
   .card-top { display: flex; align-items: flex-start; gap: 10px; }
   .card-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
@@ -133,6 +136,145 @@
   .copy-btn:hover { background: var(--surface2); color: var(--text); border-color: #4d565e; }
   .copy-btn.copied { color: var(--accent3); border-color: var(--accent3); }
 
+  .detail-btn {
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 6px; color: var(--accent2); cursor: pointer; font-size: 0.74rem;
+    padding: 4px 10px; transition: all 0.15s; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .detail-btn:hover { background: rgba(121,192,255,0.08); border-color: var(--accent2); }
+
+  /* ── Detail Panel (slide-in) ── */
+  .panel-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    z-index: 100; opacity: 0; pointer-events: none;
+    transition: opacity 0.22s;
+  }
+  .panel-overlay.open { opacity: 1; pointer-events: all; }
+
+  .panel {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: min(760px, 100vw);
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 101;
+    display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+  }
+  .panel.open { transform: translateX(0); }
+
+  .panel-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 12px;
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+  .panel-header-info { flex: 1; min-width: 0; }
+  .panel-title { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+  .panel-slug { font-family: monospace; font-size: 0.78rem; color: var(--text-dim); margin-top: 3px; }
+
+  .panel-close {
+    background: var(--tag-bg); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text-dim); cursor: pointer; font-size: 1rem; width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .panel-close:hover { color: var(--text); border-color: #4d565e; }
+
+  /* ── Panel Tabs ── */
+  .panel-tabs {
+    display: flex; gap: 0; border-bottom: 1px solid var(--border);
+    flex-shrink: 0; background: var(--surface2); padding: 0 24px;
+  }
+  .ptab {
+    background: transparent; border: none; border-bottom: 2px solid transparent;
+    color: var(--text-dim); cursor: pointer; font-size: 0.84rem; padding: 10px 14px;
+    transition: all 0.15s;
+  }
+  .ptab:hover { color: var(--text); }
+  .ptab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+  /* ── Panel Body ── */
+  .panel-body {
+    flex: 1; overflow-y: auto; padding: 24px;
+  }
+
+  /* ── References sidebar inside panel ── */
+  .ref-list {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .ref-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; cursor: pointer; transition: all 0.15s;
+    text-decoration: none;
+  }
+  .ref-item:hover { border-color: var(--accent2); color: var(--accent2); }
+  .ref-item .ref-name { font-family: monospace; font-size: 0.84rem; color: var(--accent2); flex: 1; }
+  .ref-item .ref-arrow { color: var(--text-dim); font-size: 0.85rem; }
+
+  /* ── Markdown Render ── */
+  .md-body {
+    font-size: 0.88rem; line-height: 1.75;
+    color: var(--text);
+  }
+  .md-body h1 { font-size: 1.3rem; font-weight: 700; margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .md-body h2 { font-size: 1.05rem; font-weight: 700; margin: 24px 0 10px; color: var(--accent2); }
+  .md-body h3 { font-size: 0.94rem; font-weight: 700; margin: 18px 0 8px; color: var(--accent4); }
+  .md-body h4 { font-size: 0.88rem; font-weight: 700; margin: 14px 0 6px; color: var(--text-dim); }
+  .md-body p { margin: 0 0 12px; }
+  .md-body ul, .md-body ol { margin: 0 0 12px 20px; }
+  .md-body li { margin-bottom: 4px; }
+  .md-body code {
+    background: #010409; border: 1px solid var(--border); border-radius: 4px;
+    font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.82rem;
+    padding: 1px 6px; color: var(--accent3);
+  }
+  .md-body pre {
+    background: #010409; border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; overflow-x: auto; margin: 0 0 14px;
+  }
+  .md-body pre code {
+    background: none; border: none; padding: 0; font-size: 0.82rem;
+    color: var(--accent3); white-space: pre;
+  }
+  .md-body blockquote {
+    border-left: 3px solid var(--accent2); padding: 4px 14px;
+    margin: 0 0 12px; color: var(--text-dim); font-style: italic;
+  }
+  .md-body table { border-collapse: collapse; width: 100%; margin: 0 0 14px; font-size: 0.82rem; }
+  .md-body th { background: var(--surface2); padding: 7px 12px; border: 1px solid var(--border); color: var(--text-dim); font-weight: 600; }
+  .md-body td { padding: 7px 12px; border: 1px solid var(--border); }
+  .md-body a { color: var(--accent2); }
+  .md-body strong { color: var(--text); }
+  .md-body hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* ── Loading / Error ── */
+  .loading-state {
+    display: flex; align-items: center; justify-content: center;
+    padding: 60px 20px; color: var(--text-dim); gap: 10px;
+    font-size: 0.9rem;
+  }
+  .spinner {
+    width: 20px; height: 20px; border: 2px solid var(--border);
+    border-top-color: var(--accent2); border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; color: var(--text-dim); margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .breadcrumb-link { color: var(--accent2); cursor: pointer; }
+  .breadcrumb-link:hover { text-decoration: underline; }
+  .breadcrumb-sep { color: var(--border); }
+
   /* ── Flow diagram ── */
   .flow-section {
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
@@ -146,7 +288,9 @@
   .flow-node {
     background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
     padding: 10px 16px; text-align: center; min-width: 120px;
+    cursor: pointer; transition: border-color 0.15s;
   }
+  .flow-node:hover { border-color: var(--accent2); }
   .flow-node .fn-label { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 3px; }
   .flow-node .fn-name  { font-weight: 600; color: var(--text); font-size: 0.85rem; }
   .flow-arrow { color: var(--text-dim); font-size: 1.1rem; padding: 0 8px; }
@@ -165,6 +309,7 @@
     .install-banner { padding: 18px; }
     .flow { flex-direction: column; align-items: flex-start; }
     .flow-arrow { transform: rotate(90deg); }
+    .panel { width: 100vw; }
   }
 </style>
 </head>
@@ -216,22 +361,22 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
 <div class="flow-section">
   <h2>🔄 Recommended Skill Chain</h2>
   <div class="flow">
-    <div class="flow-node"><div class="fn-label">入口</div><div class="fn-name">protocol-knowledge</div></div>
+    <div class="flow-node" onclick="openSkill('protocol-knowledge','Protocol Knowledge','📚')"><div class="fn-label">入口</div><div class="fn-name">protocol-knowledge</div></div>
     <div class="flow-arrow">→</div>
-    <div class="flow-node"><div class="fn-label">轉換</div><div class="fn-name">tenji-workflow</div></div>
+    <div class="flow-node" onclick="openSkill('tenji-workflow','TENJI Workflow','⚙️')"><div class="fn-label">轉換</div><div class="fn-name">tenji-workflow</div></div>
     <div class="flow-arrow">→</div>
-    <div class="flow-node"><div class="fn-label">模板</div><div class="fn-name">tenji-ready</div></div>
+    <div class="flow-node" onclick="openSkill('tenji-ready','TENJI Ready','📐')"><div class="fn-label">模板</div><div class="fn-name">tenji-ready</div></div>
     <div class="flow-arrow">→</div>
-    <div class="flow-node"><div class="fn-label">語法</div><div class="fn-name">tenji-guide</div></div>
+    <div class="flow-node" onclick="openSkill('tenji-guide','TENJI Guide','📖')"><div class="fn-label">語法</div><div class="fn-name">tenji-guide</div></div>
   </div>
   <div class="flow" style="margin-top:14px;">
-    <div class="flow-node"><div class="fn-label">分析</div><div class="fn-name">jd6628h-*-analysis</div></div>
+    <div class="flow-node" style="cursor:default"><div class="fn-label">分析</div><div class="fn-name">jd6628h-*-analysis</div></div>
     <div class="flow-arrow">→</div>
-    <div class="flow-node"><div class="fn-label">讀取</div><div class="fn-name">tenji-sa-plan-intake</div></div>
+    <div class="flow-node" onclick="openSkill('tenji-sa-plan-intake','SA Plan Intake','📥')"><div class="fn-label">讀取</div><div class="fn-name">tenji-sa-plan-intake</div></div>
     <div class="flow-arrow">→</div>
-    <div class="flow-node"><div class="fn-label">映射</div><div class="fn-name">sa-plan-to-mother-template</div></div>
+    <div class="flow-node" onclick="openSkill('tenji-sa-plan-to-mother-template-mapping','SA Plan → Mother Template','🗺️')"><div class="fn-label">映射</div><div class="fn-name">sa-plan-to-mother-template</div></div>
     <div class="flow-arrow">→</div>
-    <div class="flow-node"><div class="fn-label">產出</div><div class="fn-name">tenji-single-item-pipeline</div></div>
+    <div class="flow-node" onclick="openSkill('tenji-single-item-pipeline','TENJI Single-Item Pipeline','🚀')"><div class="fn-label">產出</div><div class="fn-name">tenji-single-item-pipeline</div></div>
   </div>
 </div>
 
@@ -244,7 +389,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
   <div class="grid">
 
-    <div class="card">
+    <div class="card" onclick="openSkill('tenji-guide','TENJI Guide','📖')">
       <div class="card-top">
         <span class="card-icon">📖</span>
         <div>
@@ -258,11 +403,12 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag tag-blue">Hermes</span>
         <span class="tag">TENJI</span>
         <span class="tag">語法</span>
-        <button class="copy-btn" onclick="copyInstall(this,'tenji-guide')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('tenji-guide','TENJI Guide','📖')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'tenji-guide')">複製安裝指令</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" onclick="openSkill('tenji-workflow','TENJI Workflow','⚙️')">
       <div class="card-top">
         <span class="card-icon">⚙️</span>
         <div>
@@ -276,11 +422,12 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag tag-blue">Hermes</span>
         <span class="tag">workflow</span>
         <span class="tag">event chain</span>
-        <button class="copy-btn" onclick="copyInstall(this,'tenji-workflow')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('tenji-workflow','TENJI Workflow','⚙️')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'tenji-workflow')">複製安裝指令</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" onclick="openSkill('tenji-ready','TENJI Ready','📐')">
       <div class="card-top">
         <span class="card-icon">📐</span>
         <div>
@@ -294,11 +441,12 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag tag-blue">Hermes</span>
         <span class="tag">模板</span>
         <span class="tag">Excel 映射</span>
-        <button class="copy-btn" onclick="copyInstall(this,'tenji-ready')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('tenji-ready','TENJI Ready','📐')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'tenji-ready')">複製安裝指令</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" onclick="openSkill('protocol-knowledge','Protocol Knowledge','📚')">
       <div class="card-top">
         <span class="card-icon">⚡</span>
         <div>
@@ -312,7 +460,8 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag tag-blue">Hermes</span>
         <span class="tag">充電協議</span>
         <span class="tag">PD/PPS/QC</span>
-        <button class="copy-btn" onclick="copyInstall(this,'protocol-knowledge')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('protocol-knowledge','Protocol Knowledge','📚')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'protocol-knowledge')">複製安裝指令</button>
       </div>
     </div>
 
@@ -328,7 +477,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
   <div class="grid">
 
-    <div class="card">
+    <div class="card" onclick="openSkill('jd6628h-single-power-mode-analysis','JD6628H 單電源模式分析','🔌')">
       <div class="card-top">
         <span class="card-icon">🔌</span>
         <div>
@@ -342,11 +491,12 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag">JD6628H</span>
         <span class="tag">單電源</span>
         <span class="tag">SA Plan</span>
-        <button class="copy-btn" onclick="copyInstall(this,'jd6628h-single-power-mode-analysis')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('jd6628h-single-power-mode-analysis','JD6628H 單電源模式分析','🔌')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'jd6628h-single-power-mode-analysis')">複製安裝指令</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" onclick="openSkill('jd6628h-dual-power-mode-analysis','JD6628H 雙電源模式分析','🔋')">
       <div class="card-top">
         <span class="card-icon">🔋</span>
         <div>
@@ -359,11 +509,12 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag tag-blue">Hermes</span>
         <span class="tag">JD6628H</span>
         <span class="tag">雙電源</span>
-        <button class="copy-btn" onclick="copyInstall(this,'jd6628h-dual-power-mode-analysis')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('jd6628h-dual-power-mode-analysis','JD6628H 雙電源模式分析','🔋')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'jd6628h-dual-power-mode-analysis')">複製安裝指令</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" onclick="openSkill('jd6628h-blind-insert-mode-analysis','JD6628H 智能盲插模式分析','🔍')">
       <div class="card-top">
         <span class="card-icon">🔍</span>
         <div>
@@ -377,7 +528,8 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag">JD6628H</span>
         <span class="tag">盲插</span>
         <span class="tag">OOXML</span>
-        <button class="copy-btn" onclick="copyInstall(this,'jd6628h-blind-insert-mode-analysis')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('jd6628h-blind-insert-mode-analysis','JD6628H 智能盲插模式分析','🔍')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'jd6628h-blind-insert-mode-analysis')">複製安裝指令</button>
       </div>
     </div>
 
@@ -393,7 +545,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
   <div class="grid">
 
-    <div class="card">
+    <div class="card" onclick="openSkill('tenji-sa-plan-intake','SA Plan Intake','📥')">
       <div class="card-top">
         <span class="card-icon">📥</span>
         <div>
@@ -407,11 +559,12 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag">SA Plan</span>
         <span class="tag">OOXML</span>
         <span class="tag">分析</span>
-        <button class="copy-btn" onclick="copyInstall(this,'tenji-sa-plan-intake')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('tenji-sa-plan-intake','SA Plan Intake','📥')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'tenji-sa-plan-intake')">複製安裝指令</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" onclick="openSkill('tenji-sa-plan-to-mother-template-mapping','SA Plan → Mother Template','🗺️')">
       <div class="card-top">
         <span class="card-icon">🗺️</span>
         <div>
@@ -424,11 +577,12 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag tag-blue">Hermes</span>
         <span class="tag">映射</span>
         <span class="tag">Mother Template</span>
-        <button class="copy-btn" onclick="copyInstall(this,'tenji-sa-plan-to-mother-template-mapping')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('tenji-sa-plan-to-mother-template-mapping','SA Plan → Mother Template','🗺️')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'tenji-sa-plan-to-mother-template-mapping')">複製安裝指令</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" onclick="openSkill('tenji-single-item-pipeline','TENJI Single-Item Pipeline','🚀')">
       <div class="card-top">
         <span class="card-icon">🚀</span>
         <div>
@@ -442,7 +596,8 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag">Pipeline</span>
         <span class="tag">.xlsm</span>
         <span class="tag">Roundtrip</span>
-        <button class="copy-btn" onclick="copyInstall(this,'tenji-single-item-pipeline')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('tenji-single-item-pipeline','TENJI Single-Item Pipeline','🚀')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'tenji-single-item-pipeline')">複製安裝指令</button>
       </div>
     </div>
 
@@ -458,7 +613,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
   <div class="grid">
 
-    <div class="card">
+    <div class="card" onclick="openSkill('tim2tenji-backend-feature-slice','TIM2TENJI Backend Feature Slice','🔧')">
       <div class="card-top">
         <span class="card-icon">🔧</span>
         <div>
@@ -472,11 +627,12 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag">TIM2TENJI</span>
         <span class="tag">後端</span>
         <span class="tag">TDD</span>
-        <button class="copy-btn" onclick="copyInstall(this,'tim2tenji-backend-feature-slice')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('tim2tenji-backend-feature-slice','TIM2TENJI Backend Feature Slice','🔧')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'tim2tenji-backend-feature-slice')">複製安裝指令</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" onclick="openSkill('tim2tenji-project-detail-ui-slice','TIM2TENJI Project Detail UI Slice','🖥️')">
       <div class="card-top">
         <span class="card-icon">🖥️</span>
         <div>
@@ -490,7 +646,8 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag">TIM2TENJI</span>
         <span class="tag">前端</span>
         <span class="tag">UI</span>
-        <button class="copy-btn" onclick="copyInstall(this,'tim2tenji-project-detail-ui-slice')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('tim2tenji-project-detail-ui-slice','TIM2TENJI Project Detail UI Slice','🖥️')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'tim2tenji-project-detail-ui-slice')">複製安裝指令</button>
       </div>
     </div>
 
@@ -506,7 +663,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
   <div class="grid">
 
-    <div class="card">
+    <div class="card" onclick="openSkill('cadence-ams-log-triage','Cadence AMS Log Triage','🧪')">
       <div class="card-top">
         <span class="card-icon">🧪</span>
         <div>
@@ -521,7 +678,8 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
         <span class="tag">AMS</span>
         <span class="tag">Xcelium</span>
         <span class="tag">Spectre</span>
-        <button class="copy-btn" onclick="copyInstall(this,'cadence-ams-log-triage')">複製安裝指令</button>
+        <button class="detail-btn" onclick="event.stopPropagation();openSkill('cadence-ams-log-triage','Cadence AMS Log Triage','🧪')">查看詳細 →</button>
+        <button class="copy-btn" onclick="event.stopPropagation();copyInstall(this,'cadence-ams-log-triage')">複製安裝指令</button>
       </div>
     </div>
 
@@ -538,10 +696,31 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   <p style="margin-top:6px;">Built with 🦞 by <a href="https://github.com/pmu2claw-dev" target="_blank">pmu2claw-dev</a> · MIT License</p>
 </footer>
 
+<!-- ══ Detail Panel ══ -->
+<div class="panel-overlay" id="overlay" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <div class="panel-header">
+    <div class="panel-header-info">
+      <div class="panel-title" id="panel-title">—</div>
+      <div class="panel-slug" id="panel-slug">—</div>
+    </div>
+    <button class="panel-close" onclick="closePanel()" title="關閉">✕</button>
+  </div>
+  <div class="panel-tabs">
+    <button class="ptab active" id="ptab-skill" onclick="switchPanelTab('skill')">📄 SKILL.md</button>
+    <button class="ptab" id="ptab-refs" onclick="switchPanelTab('refs')">📂 References</button>
+  </div>
+  <div class="panel-body" id="panel-body">
+    <div class="loading-state"><div class="spinner"></div>載入中…</div>
+  </div>
+</div>
+
 <script>
 const REPO = 'pmu2claw-dev/pmu2claw-skills';
-const RAW = `https://raw.githubusercontent.com/${REPO}/main`;
+const RAW  = `https://raw.githubusercontent.com/${REPO}/main`;
+const API  = `https://api.github.com/repos/${REPO}/contents`;
 
+// ── Install Tab ──
 function switchTab(btn, id) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -550,6 +729,7 @@ function switchTab(btn, id) {
   });
 }
 
+// ── Copy install ──
 function copyInstall(btn, slug) {
   const text = `hermes skills install ${RAW}/${slug}/SKILL.md`;
   navigator.clipboard.writeText(text).then(() => {
@@ -557,6 +737,153 @@ function copyInstall(btn, slug) {
     btn.classList.add('copied');
     setTimeout(() => { btn.textContent = '複製安裝指令'; btn.classList.remove('copied'); }, 1800);
   });
+}
+
+// ── Panel state ──
+let currentSlug = null;
+let currentTab  = 'skill';
+let cache = {};  // slug -> { skill: text, refs: [{name,url}], refContent: {name: text} }
+
+function openSkill(slug, name, icon) {
+  currentSlug = slug;
+  currentTab  = 'skill';
+  document.getElementById('panel-title').textContent = icon + ' ' + name;
+  document.getElementById('panel-slug').textContent  = slug;
+  document.getElementById('ptab-skill').classList.add('active');
+  document.getElementById('ptab-refs').classList.remove('active');
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  loadSkillMd(slug);
+}
+
+function closePanel() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('panel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePanel();
+});
+
+// ── Panel tabs ──
+function switchPanelTab(tab) {
+  currentTab = tab;
+  document.getElementById('ptab-skill').classList.toggle('active', tab === 'skill');
+  document.getElementById('ptab-refs').classList.toggle('active', tab === 'refs');
+  if (tab === 'skill') {
+    loadSkillMd(currentSlug);
+  } else {
+    loadRefs(currentSlug);
+  }
+}
+
+// ── Fetch SKILL.md ──
+async function loadSkillMd(slug) {
+  const body = document.getElementById('panel-body');
+  if (cache[slug]?.skill) {
+    body.innerHTML = renderMd(cache[slug].skill, slug);
+    return;
+  }
+  body.innerHTML = '<div class="loading-state"><div class="spinner"></div>載入 SKILL.md…</div>';
+  try {
+    const res = await fetch(`${RAW}/${slug}/SKILL.md`);
+    if (!res.ok) throw new Error(res.status);
+    const text = await res.text();
+    if (!cache[slug]) cache[slug] = {};
+    cache[slug].skill = text;
+    body.innerHTML = renderMd(text, slug);
+  } catch(e) {
+    body.innerHTML = `<div class="loading-state" style="color:var(--accent)">⚠ 無法載入內容（${e.message}）</div>`;
+  }
+}
+
+// ── Fetch refs list ──
+async function loadRefs(slug) {
+  const body = document.getElementById('panel-body');
+  if (cache[slug]?.refs) {
+    renderRefList(cache[slug].refs);
+    return;
+  }
+  body.innerHTML = '<div class="loading-state"><div class="spinner"></div>載入 references…</div>';
+  try {
+    const res = await fetch(`${API}/${slug}/references`);
+    if (res.status === 404) {
+      body.innerHTML = '<div class="loading-state" style="color:var(--text-dim)">此 skill 無 references 目錄</div>';
+      return;
+    }
+    if (!res.ok) throw new Error(res.status);
+    const files = await res.json();
+    const refs = files
+      .filter(f => f.name.endsWith('.md'))
+      .map(f => ({ name: f.name, url: f.download_url }));
+    if (!cache[slug]) cache[slug] = {};
+    cache[slug].refs = refs;
+    renderRefList(refs);
+  } catch(e) {
+    body.innerHTML = `<div class="loading-state" style="color:var(--accent)">⚠ 無法載入 references（${e.message}）</div>`;
+  }
+}
+
+function renderRefList(refs) {
+  const body = document.getElementById('panel-body');
+  if (!refs.length) {
+    body.innerHTML = '<div class="loading-state" style="color:var(--text-dim)">沒有 .md 檔案</div>';
+    return;
+  }
+  body.innerHTML = `
+    <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:14px;">${refs.length} 個 reference 檔案 — 點擊查看內容</div>
+    <div class="ref-list">
+      ${refs.map(r => `
+        <div class="ref-item" onclick="loadRefFile('${currentSlug}','${r.name}','${r.url}')">
+          <span class="ref-name">📄 ${r.name}</span>
+          <span class="ref-arrow">→</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ── Load a specific reference file ──
+async function loadRefFile(slug, name, url) {
+  const body = document.getElementById('panel-body');
+  if (cache[slug]?.refContent?.[name]) {
+    body.innerHTML = refFileHtml(slug, name, cache[slug].refContent[name]);
+    return;
+  }
+  body.innerHTML = `<div class="loading-state"><div class="spinner"></div>載入 ${name}…</div>`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(res.status);
+    const text = await res.text();
+    if (!cache[slug]) cache[slug] = {};
+    if (!cache[slug].refContent) cache[slug].refContent = {};
+    cache[slug].refContent[name] = text;
+    body.innerHTML = refFileHtml(slug, name, text);
+  } catch(e) {
+    body.innerHTML = `<div class="loading-state" style="color:var(--accent)">⚠ 載入失敗（${e.message}）</div>`;
+  }
+}
+
+function refFileHtml(slug, name, text) {
+  return `
+    <div class="breadcrumb">
+      <span class="breadcrumb-link" onclick="loadRefs('${slug}')">references/</span>
+      <span class="breadcrumb-sep">›</span>
+      <span>${name}</span>
+    </div>
+    ${renderMd(text, slug)}
+  `;
+}
+
+// ── Markdown render ──
+function renderMd(text, slug) {
+  // strip frontmatter
+  const stripped = text.replace(/^---[\s\S]*?---\n/, '');
+  marked.setOptions({ breaks: true, gfm: true });
+  const html = marked.parse(stripped);
+  return `<div class="md-body">${html}</div>`;
 }
 </script>
 </body>
