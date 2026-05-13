@@ -434,6 +434,12 @@
 
   /* ── Tools Section ── */
   .tools-section { margin-bottom: 52px; }
+  .tools-section-header { cursor: pointer; user-select: none; }
+  .tools-section-header:hover .group-title { color: var(--accent2); }
+  .tools-chevron { color: var(--text-dim); font-size: 0.85rem; transition: transform 0.2s; margin-left: auto; }
+  .tools-chevron.open { transform: rotate(180deg); }
+  .tools-body { display: none; }
+  .tools-body.open { display: block; }
   .tools-subgroup { margin-bottom: 32px; }
   .tools-subgroup-header {
     display: flex; align-items: center; gap: 8px;
@@ -860,12 +866,15 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
 
 <!-- ══ Tools Section ══ -->
 <div class="tools-section" id="tools-section">
-  <div class="group-header">
+  <div class="group-header tools-section-header" onclick="toggleTools()">
     <span class="group-icon">🔧</span>
     <span class="group-title">Tools</span>
     <span class="group-count" id="tools-total-count"></span>
-    <span style="margin-left:auto;font-size:0.78rem;color:var(--text-dim)">連動工具腳本 · 點擊查看原始碼</span>
+    <span style="font-size:0.78rem;color:var(--text-dim)">連動工具腳本 · 點擊查看原始碼</span>
+    <span class="tools-chevron" id="tools-chevron">▼</span>
   </div>
+
+  <div class="tools-body" id="tools-body">
 
   <div class="tools-subgroup">
     <div class="tools-subgroup-header">
@@ -910,6 +919,8 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
       <div class="tools-loading"><div class="spinner" style="display:inline-block;margin-right:8px"></div>載入中…</div>
     </div>
   </div>
+
+  </div><!-- /.tools-body -->
 </div>
 
 <!-- ══ README Section ══ -->
@@ -1242,6 +1253,8 @@ function filterSkills(q) {
     const hasCards = toolsSection.querySelectorAll('.tool-card').length > 0;
     if (hasCards) toolsSection.style.display = toolsSectionVisible ? '' : 'none';
     if (toolsSectionVisible) anyVisible = true;
+    // 搜尋命中時自動展開，清空時不強制收合
+    if (q && toolsSectionVisible && hasCards && !toolsOpen) toggleTools(true);
   }
 
   // CHANGELOG
@@ -1529,6 +1542,15 @@ async function loadReadme() {
 
 
 // ── CHANGELOG viewer ──
+// ── Tools collapse ──
+let toolsOpen = false;
+function toggleTools(forceOpen) {
+  if (forceOpen !== undefined) toolsOpen = forceOpen;
+  else toolsOpen = !toolsOpen;
+  document.getElementById('tools-body').classList.toggle('open', toolsOpen);
+  document.getElementById('tools-chevron').classList.toggle('open', toolsOpen);
+}
+
 let changelog2Loaded = false;
 let changelog2Open   = false;
 
