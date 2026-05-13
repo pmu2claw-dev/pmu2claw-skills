@@ -1235,8 +1235,8 @@ function filterSkills(q) {
         card.style.display = match ? '' : 'none';
         if (match) subVisible = true;
       });
-      sub.style.display = subVisible ? '' : 'none';
-      if (subVisible) toolsSectionVisible = true;
+      sub.style.display = (subVisible || !q) ? '' : 'none';
+      if (subVisible || !q) toolsSectionVisible = true;
     });
     // 只有在有 tool-card 的情況下才隱藏整個 section（避免載入中就消失）
     const hasCards = toolsSection.querySelectorAll('.tool-card').length > 0;
