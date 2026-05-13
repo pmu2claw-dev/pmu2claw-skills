@@ -524,9 +524,9 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
 <!-- ══ Search ══ -->
 <div class="search-wrap">
   <input class="search-box" id="search-input" type="search"
-    placeholder="搜尋 skill 名稱、描述、標籤…" oninput="filterSkills(this.value)">
+    placeholder="搜尋 skill、工具名稱、描述、標籤…" oninput="filterSkills(this.value)">
 </div>
-<div class="search-empty" id="search-empty">沒有符合「<span id="search-term"></span>」的 skill</div>
+<div class="search-empty" id="search-empty">沒有符合「<span id="search-term"></span>」的 skill 或工具</div>
 
 <!-- Skill Flow -->
 <div class="flow-section">
@@ -1181,19 +1181,40 @@ const _origOpenSkill = openSkill;
 function filterSkills(q) {
   q = q.trim().toLowerCase();
   document.getElementById('search-term').textContent = q;
-  document.getElementById('search-empty').style.display = '';
   let anyVisible = false;
+
+  // Skills
   document.querySelectorAll('.group').forEach(group => {
     let groupVisible = false;
     group.querySelectorAll('.card').forEach(card => {
-      const text = card.textContent.toLowerCase();
-      const match = !q || text.includes(q);
+      const match = !q || card.textContent.toLowerCase().includes(q);
       card.classList.toggle('hidden', !match);
       if (match) groupVisible = true;
     });
     group.classList.toggle('all-hidden', !groupVisible);
     if (groupVisible) anyVisible = true;
   });
+
+  // Tools
+  const toolsSection = document.getElementById('tools-section');
+  if (toolsSection) {
+    let toolsSectionVisible = false;
+    toolsSection.querySelectorAll('.tools-subgroup').forEach(sub => {
+      let subVisible = false;
+      sub.querySelectorAll('.tool-card').forEach(card => {
+        const match = !q || card.textContent.toLowerCase().includes(q);
+        card.style.display = match ? '' : 'none';
+        if (match) subVisible = true;
+      });
+      sub.style.display = subVisible ? '' : 'none';
+      if (subVisible) toolsSectionVisible = true;
+    });
+    // 只有在有 tool-card 的情況下才隱藏整個 section（避免載入中就消失）
+    const hasCards = toolsSection.querySelectorAll('.tool-card').length > 0;
+    if (hasCards) toolsSection.style.display = toolsSectionVisible ? '' : 'none';
+    if (toolsSectionVisible) anyVisible = true;
+  }
+
   document.getElementById('search-empty').style.display = (!q || anyVisible) ? 'none' : '';
 }
 
