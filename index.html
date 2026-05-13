@@ -392,6 +392,45 @@
   footer a { color: var(--accent2); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
 
+
+  /* ── Search ── */
+  .search-wrap {
+    max-width: 860px; margin: 0 auto 36px; padding: 0 24px;
+  }
+  .search-box {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 0.92rem;
+    padding: 10px 16px 10px 40px; outline: none; transition: border-color 0.15s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238b949e' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: 13px center;
+  }
+  .search-box:focus { border-color: var(--accent2); }
+  .search-box::placeholder { color: var(--text-dim); }
+  .search-empty {
+    text-align: center; padding: 48px 24px;
+    color: var(--text-dim); font-size: 0.9rem; display: none;
+  }
+  .card.hidden { display: none; }
+  .group.all-hidden { display: none; }
+
+  /* ── Last Updated ── */
+  .card-updated {
+    font-size: 0.72rem; color: var(--text-dim);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .card-updated .upd-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent3); }
+
+  /* ── Related Skills ── */
+  .related-section { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .related-title { font-size: 0.8rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .related-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .related-chip {
+    background: var(--tag-bg); border: 1px solid var(--border); border-radius: 20px;
+    padding: 5px 14px; font-size: 0.8rem; color: var(--accent2); cursor: pointer;
+    transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .related-chip:hover { border-color: var(--accent2); background: rgba(121,192,255,0.08); }
+
   /* ── Responsive ── */
   @media (max-width: 600px) {
     header h1 { font-size: 1.4rem; }
@@ -410,7 +449,7 @@
   <h1>PMU2CLAW <span>Skills</span></h1>
   <p class="tagline">Fitipower IC Test Automation AI Skill Pack — TENJI · JD6628H · TIM2TENJI · Cadence AMS</p>
   <div class="badges">
-    <span class="badge"><span class="badge-dot dot-green"></span>13 Skills</span>
+    <span class="badge" id="badge-count"><span class="badge-dot dot-green"></span><span id="skill-count">13</span> Skills</span>
     <span class="badge"><span class="badge-dot dot-blue"></span>OpenClaw Compatible</span>
     <span class="badge"><span class="badge-dot dot-blue"></span>Hermes Compatible</span>
     <span class="badge"><span class="badge-dot dot-purple"></span>Claude Code Compatible</span>
@@ -446,6 +485,13 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
 <!-- ══ Main ══ -->
 <main>
 
+<!-- ══ Search ══ -->
+<div class="search-wrap">
+  <input class="search-box" id="search-input" type="search"
+    placeholder="搜尋 skill 名稱、描述、標籤…" oninput="filterSkills(this.value)">
+</div>
+<div class="search-empty" id="search-empty">沒有符合「<span id="search-term"></span>」的 skill</div>
+
 <!-- Skill Flow -->
 <div class="flow-section">
   <h2>🔄 Recommended Skill Chain</h2>
@@ -478,7 +524,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
   <div class="grid">
 
-    <div class="card" onclick="openSkill('tenji-guide','TENJI Guide','📖')">
+    <div class="card" data-slug="tenji-guide" onclick="openSkill('tenji-guide','TENJI Guide','📖')">
       <div class="card-top">
         <span class="card-icon">📖</span>
         <div>
@@ -497,7 +543,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
       </div>
     </div>
 
-    <div class="card" onclick="openSkill('tenji-workflow','TENJI Workflow','⚙️')">
+    <div class="card" data-slug="tenji-workflow" onclick="openSkill('tenji-workflow','TENJI Workflow','⚙️')">
       <div class="card-top">
         <span class="card-icon">⚙️</span>
         <div>
@@ -516,7 +562,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
       </div>
     </div>
 
-    <div class="card" onclick="openSkill('tenji-ready','TENJI Ready','📐')">
+    <div class="card" data-slug="tenji-ready" onclick="openSkill('tenji-ready','TENJI Ready','📐')">
       <div class="card-top">
         <span class="card-icon">📐</span>
         <div>
@@ -535,7 +581,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
       </div>
     </div>
 
-    <div class="card" onclick="openSkill('protocol-knowledge','Protocol Knowledge','📚')">
+    <div class="card" data-slug="protocol-knowledge" onclick="openSkill('protocol-knowledge','Protocol Knowledge','📚')">
       <div class="card-top">
         <span class="card-icon">⚡</span>
         <div>
@@ -566,7 +612,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
   <div class="grid">
 
-    <div class="card" onclick="openSkill('jd6628h-single-power-mode-analysis','JD6628H 單電源模式分析','🔌')">
+    <div class="card" data-slug="jd6628h-single-power-mode-analysis" onclick="openSkill('jd6628h-single-power-mode-analysis','JD6628H 單電源模式分析','🔌')">
       <div class="card-top">
         <span class="card-icon">🔌</span>
         <div>
@@ -585,7 +631,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
       </div>
     </div>
 
-    <div class="card" onclick="openSkill('jd6628h-dual-power-mode-analysis','JD6628H 雙電源模式分析','🔋')">
+    <div class="card" data-slug="jd6628h-dual-power-mode-analysis" onclick="openSkill('jd6628h-dual-power-mode-analysis','JD6628H 雙電源模式分析','🔋')">
       <div class="card-top">
         <span class="card-icon">🔋</span>
         <div>
@@ -603,7 +649,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
       </div>
     </div>
 
-    <div class="card" onclick="openSkill('jd6628h-blind-insert-mode-analysis','JD6628H 智能盲插模式分析','🔍')">
+    <div class="card" data-slug="jd6628h-blind-insert-mode-analysis" onclick="openSkill('jd6628h-blind-insert-mode-analysis','JD6628H 智能盲插模式分析','🔍')">
       <div class="card-top">
         <span class="card-icon">🔍</span>
         <div>
@@ -634,7 +680,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
   <div class="grid">
 
-    <div class="card" onclick="openSkill('tenji-sa-plan-intake','SA Plan Intake','📥')">
+    <div class="card" data-slug="tenji-sa-plan-intake" onclick="openSkill('tenji-sa-plan-intake','SA Plan Intake','📥')">
       <div class="card-top">
         <span class="card-icon">📥</span>
         <div>
@@ -653,7 +699,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
       </div>
     </div>
 
-    <div class="card" onclick="openSkill('tenji-sa-plan-to-mother-template-mapping','SA Plan → Mother Template','🗺️')">
+    <div class="card" data-slug="tenji-sa-plan-to-mother-template-mapping" onclick="openSkill('tenji-sa-plan-to-mother-template-mapping','SA Plan → Mother Template','🗺️')">
       <div class="card-top">
         <span class="card-icon">🗺️</span>
         <div>
@@ -671,7 +717,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
       </div>
     </div>
 
-    <div class="card" onclick="openSkill('tenji-single-item-pipeline','TENJI Single-Item Pipeline','🚀')">
+    <div class="card" data-slug="tenji-single-item-pipeline" onclick="openSkill('tenji-single-item-pipeline','TENJI Single-Item Pipeline','🚀')">
       <div class="card-top">
         <span class="card-icon">🚀</span>
         <div>
@@ -702,7 +748,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
   <div class="grid">
 
-    <div class="card" onclick="openSkill('tim2tenji-backend-feature-slice','TIM2TENJI Backend Feature Slice','🔧')">
+    <div class="card" data-slug="tim2tenji-backend-feature-slice" onclick="openSkill('tim2tenji-backend-feature-slice','TIM2TENJI Backend Feature Slice','🔧')">
       <div class="card-top">
         <span class="card-icon">🔧</span>
         <div>
@@ -721,7 +767,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
       </div>
     </div>
 
-    <div class="card" onclick="openSkill('tim2tenji-project-detail-ui-slice','TIM2TENJI Project Detail UI Slice','🖥️')">
+    <div class="card" data-slug="tim2tenji-project-detail-ui-slice" onclick="openSkill('tim2tenji-project-detail-ui-slice','TIM2TENJI Project Detail UI Slice','🖥️')">
       <div class="card-top">
         <span class="card-icon">🖥️</span>
         <div>
@@ -752,7 +798,7 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
   <div class="grid">
 
-    <div class="card" onclick="openSkill('cadence-ams-log-triage','Cadence AMS Log Triage','🧪')">
+    <div class="card" data-slug="cadence-ams-log-triage" onclick="openSkill('cadence-ams-log-triage','Cadence AMS Log Triage','🧪')">
       <div class="card-top">
         <span class="card-icon">🧪</span>
         <div>
@@ -912,7 +958,7 @@ async function loadSkillMd(slug) {
     const text = await res.text();
     if (!cache[slug]) cache[slug] = {};
     cache[slug].skill = text;
-    body.innerHTML = renderMd(text, slug);
+    body.innerHTML = renderMd(text, slug) + renderRelated(slug);
   } catch(e) {
     body.innerHTML = `<div class="loading-state" style="color:var(--accent)">⚠ 無法載入內容（${e.message}）</div>`;
   }
@@ -995,6 +1041,134 @@ function refFileHtml(slug, name, text) {
     ${renderMd(text, slug)}
   `;
 }
+
+
+// ── Related Skills ──
+const RELATED = {
+  'protocol-knowledge':   ['tenji-workflow','tenji-ready','tenji-guide'],
+  'tenji-workflow':       ['protocol-knowledge','tenji-ready','tenji-guide','tenji-sa-plan-intake'],
+  'tenji-ready':          ['tenji-workflow','tenji-guide','protocol-knowledge'],
+  'tenji-guide':          ['tenji-workflow','tenji-ready','protocol-knowledge'],
+  'jd6628h-single-power-mode-analysis': ['jd6628h-dual-power-mode-analysis','jd6628h-blind-insert-mode-analysis','tenji-sa-plan-intake'],
+  'jd6628h-dual-power-mode-analysis':   ['jd6628h-single-power-mode-analysis','jd6628h-blind-insert-mode-analysis','tenji-sa-plan-intake'],
+  'jd6628h-blind-insert-mode-analysis': ['jd6628h-single-power-mode-analysis','jd6628h-dual-power-mode-analysis','tenji-sa-plan-intake'],
+  'tenji-sa-plan-intake': ['tenji-sa-plan-to-mother-template-mapping','tenji-single-item-pipeline','jd6628h-single-power-mode-analysis'],
+  'tenji-sa-plan-to-mother-template-mapping': ['tenji-sa-plan-intake','tenji-single-item-pipeline','tenji-ready'],
+  'tenji-single-item-pipeline': ['tenji-sa-plan-to-mother-template-mapping','tenji-sa-plan-intake','tenji-ready'],
+  'tim2tenji-backend-feature-slice':   ['tim2tenji-project-detail-ui-slice'],
+  'tim2tenji-project-detail-ui-slice': ['tim2tenji-backend-feature-slice'],
+  'cadence-ams-log-triage': [],
+};
+
+const SKILL_META = {};
+document.querySelectorAll('.card[data-slug]').forEach(c => {
+  const slug = c.dataset.slug;
+  const name = c.querySelector('.card-name').textContent;
+  const icon = c.querySelector('.card-icon').textContent;
+  SKILL_META[slug] = { name, icon };
+});
+
+function renderRelated(slug) {
+  const slugs = RELATED[slug] || [];
+  if (!slugs.length) return '';
+  const chips = slugs.map(s => {
+    const m = SKILL_META[s] || { name: s, icon: '📄' };
+    return `<span class="related-chip" onclick="openSkill('${s}','${m.name}','${m.icon}')">${m.icon} ${m.name}</span>`;
+  }).join('');
+  return `<div class="related-section"><div class="related-title">相關 Skills</div><div class="related-list">${chips}</div></div>`;
+}
+
+// patch openSkill to append related after panel loads
+const _origOpenSkill = openSkill;
+
+// ── Search ──
+function filterSkills(q) {
+  q = q.trim().toLowerCase();
+  document.getElementById('search-term').textContent = q;
+  document.getElementById('search-empty').style.display = '';
+  let anyVisible = false;
+  document.querySelectorAll('.group').forEach(group => {
+    let groupVisible = false;
+    group.querySelectorAll('.card').forEach(card => {
+      const text = card.textContent.toLowerCase();
+      const match = !q || text.includes(q);
+      card.classList.toggle('hidden', !match);
+      if (match) groupVisible = true;
+    });
+    group.classList.toggle('all-hidden', !groupVisible);
+    if (groupVisible) anyVisible = true;
+  });
+  document.getElementById('search-empty').style.display = (!q || anyVisible) ? 'none' : '';
+}
+
+// ── Dynamic skill count ──
+function updateSkillCount() {
+  const n = document.querySelectorAll('.card[data-slug]').length;
+  document.getElementById('skill-count').textContent = n;
+}
+
+// ── Last Updated ──
+const updCache = {};
+async function fetchLastUpdated(slug) {
+  if (updCache[slug]) return updCache[slug];
+  try {
+    const res = await fetch(`${API}/${slug}/SKILL.md/commits?per_page=1`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.length) return null;
+    const d = data[0].commit.author.date.slice(0,10);
+    updCache[slug] = d;
+    return d;
+  } catch { return null; }
+}
+
+async function loadAllLastUpdated() {
+  const cards = document.querySelectorAll('.card[data-slug]');
+  await Promise.all([...cards].map(async card => {
+    const slug = card.dataset.slug;
+    const date = await fetchLastUpdated(slug);
+    if (!date) return;
+    const el = document.getElementById('upd-' + slug);
+    if (el) el.innerHTML = `<span class="upd-dot"></span>${date}`;
+  }));
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  updateSkillCount();
+  filterSkills('');
+  loadAllLastUpdated();
+});
+
+// Wrap openSkill to append related section
+const _openSkillOrig = window.openSkill;
+window.openSkill = function(slug, name, icon) {
+  _openSkillOrig(slug, name, icon);
+  // append related after content loads (slight delay for async)
+  setTimeout(() => {
+    const body = document.getElementById('panel-body');
+    if (body && !body.querySelector('.related-section')) {
+      body.insertAdjacentHTML('beforeend', renderRelated(slug));
+    }
+    // also hook tab switches
+    const origLoad = window._origLoadSkillMd || loadSkillMd;
+    window._currentSlugForRelated = slug;
+  }, 600);
+};
+
+// Also patch switchPanelTab to re-append related on tab switch back to skill
+const _origSwitchPanelTab = window.switchPanelTab;
+window.switchPanelTab = function(tab) {
+  _origSwitchPanelTab(tab);
+  if (tab === 'skill') {
+    setTimeout(() => {
+      const body = document.getElementById('panel-body');
+      if (body && !body.querySelector('.related-section')) {
+        body.insertAdjacentHTML('beforeend', renderRelated(currentSlug));
+      }
+    }, 400);
+  }
+};
 
 // ── Markdown render ──
 function renderMd(text, slug) {
