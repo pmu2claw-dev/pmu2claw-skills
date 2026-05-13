@@ -869,6 +869,17 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
 
   <div class="tools-subgroup">
     <div class="tools-subgroup-header">
+      <span>🔩</span>
+      <span class="tools-subgroup-title">tenji_converter <span style="font-size:0.72rem;opacity:.6">（核心邏輯）</span></span>
+      <span class="tools-subgroup-count" id="cnt-converter"></span>
+    </div>
+    <div class="grid" id="grid-converter">
+      <div class="tools-loading"><div class="spinner" style="display:inline-block;margin-right:8px"></div>載入中…</div>
+    </div>
+  </div>
+
+  <div class="tools-subgroup">
+    <div class="tools-subgroup-header">
       <span>⚙️</span>
       <span class="tools-subgroup-title">scripts</span>
       <span class="tools-subgroup-count" id="cnt-scripts"></span>
@@ -1329,9 +1340,10 @@ function renderMd(text, slug) {
 
 // ── Tools ──
 const TOOL_DIRS = [
-  { key: 'scripts',  path: 'tools/scripts',        grid: 'grid-scripts',  cnt: 'cnt-scripts'  },
-  { key: 'pipeline', path: 'tools/tenji_pipeline',  grid: 'grid-pipeline', cnt: 'cnt-pipeline' },
-  { key: 'examples', path: 'tools/examples',        grid: 'grid-examples', cnt: 'cnt-examples' },
+  { key: 'converter', path: 'tools/tenji_converter', grid: 'grid-converter', cnt: 'cnt-converter' },
+  { key: 'scripts',   path: 'tools/scripts',         grid: 'grid-scripts',   cnt: 'cnt-scripts'  },
+  { key: 'pipeline',  path: 'tools/tenji_pipeline',  grid: 'grid-pipeline',  cnt: 'cnt-pipeline' },
+  { key: 'examples',  path: 'tools/examples',        grid: 'grid-examples',  cnt: 'cnt-examples' },
 ];
 
 const toolCache = {};  // path -> { files, content }
