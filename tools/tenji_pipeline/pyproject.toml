@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tenji-single-item-pipeline"
+version = "0.1.0"
+description = "Alpha TENJI single-item pipeline scaffold for reviewed-spec validation, workbook assembly, and verification."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+  {name = "Hermes Agent"}
+]
+dependencies = [
+  "openpyxl>=3.1.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "build>=1.2.0"
+]
+
+[project.scripts]
+tenji-convert-single-item = "tenji_single_item_pipeline.convert_single_item:main"
+tenji-validate-single-item = "tenji_single_item_pipeline.validate_single_item:main"
+tenji-assemble-workbook = "tenji_single_item_pipeline.assemble_workbook:main"
+tenji-verify-workbook = "tenji_single_item_pipeline.verify_workbook:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
