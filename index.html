@@ -1195,9 +1195,6 @@ function renderRelated(slug) {
   return `<div class="related-section"><div class="related-title">相關 Skills</div><div class="related-list">${chips}</div></div>`;
 }
 
-// patch openSkill to append related after panel loads
-const _origOpenSkill = openSkill;
-
 // ── Search ──
 function filterSkills(q) {
   q = q.trim().toLowerCase();
@@ -1274,7 +1271,7 @@ const updCache = {};
 async function fetchLastUpdated(slug) {
   if (updCache[slug]) return updCache[slug];
   try {
-    const res = await fetch(`${API}/${slug}/SKILL.md/commits?per_page=1`);
+    const res = await fetch(`https://api.github.com/repos/${REPO}/commits?path=${slug}/SKILL.md&per_page=1`);
     if (!res.ok) return null;
     const data = await res.json();
     if (!data.length) return null;
@@ -1282,17 +1279,6 @@ async function fetchLastUpdated(slug) {
     updCache[slug] = d;
     return d;
   } catch { return null; }
-}
-
-async function loadAllLastUpdated() {
-  const cards = document.querySelectorAll('.card[data-slug]');
-  await Promise.all([...cards].map(async card => {
-    const slug = card.dataset.slug;
-    const date = await fetchLastUpdated(slug);
-    if (!date) return;
-    const el = document.getElementById('upd-' + slug);
-    if (el) el.innerHTML = `<span class="upd-dot"></span>${date}`;
-  }));
 }
 
 // ── Init ──
