@@ -981,6 +981,12 @@ const REPO = 'pmu2claw-dev/pmu2claw-skills';
 const RAW  = `https://raw.githubusercontent.com/${REPO}/main`;
 const API  = `https://api.github.com/repos/${REPO}/contents`;
 
+// Skills that have a references/ directory (static list to avoid API calls)
+const SKILLS_WITH_REFS = new Set([
+  'tenji-guide', 'tenji-workflow', 'tenji-ready', 'protocol-knowledge',
+  'jd6628h-single-power-mode-analysis', 'tenji-sa-plan-intake',
+]);
+
 // ── Install Tab ──
 function switchTab(btn, id) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1012,9 +1018,8 @@ function openSkill(slug, name, icon) {
   document.getElementById('panel-slug').textContent  = slug;
   document.getElementById('ptab-skill').classList.add('active');
   document.getElementById('ptab-refs').classList.remove('active');
-  // 從快取決定 refs tab 是否顯示，未知則先顯示（loadRefs 會在 404 時隱藏）
-  const refsKnown = cache[slug]?.refsChecked;
-  document.getElementById('ptab-refs').style.display = refsKnown === false ? 'none' : '';
+  // 靜態清單決定 refs tab 顯示（避免 API call）
+  document.getElementById('ptab-refs').style.display = SKILLS_WITH_REFS.has(slug) ? '' : 'none';
   document.getElementById('overlay').classList.add('open');
   document.getElementById('panel').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1426,18 +1431,7 @@ async function fetchToolMeta(dirPath, name, downloadUrl) {
       if (el) el.textContent = desc || '—';
     }
   } catch {}
-  // last updated
-  try {
-    const res2 = await fetch(`${API}/${dirPath}/${name}/commits?per_page=1`);
-    if (res2.ok) {
-      const data = await res2.json();
-      if (data.length) {
-        const d = data[0].commit.author.date.slice(0,10);
-        const el = document.getElementById(`tupd-${key}`);
-        if (el) el.innerHTML = `<span class="upd-dot"></span>${d}`;
-      }
-    }
-  } catch {}
+  // last updated — skipped to conserve API rate limit
 }
 
 // 在 detail panel 開啟工具原始碼
