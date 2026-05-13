@@ -8,6 +8,18 @@
 
 ---
 
+## [1.5.0] — 2026-05-13
+
+### Changed
+- **`index.html`** 移除「修改歷程」區塊（GitHub Commits API），保留 CHANGELOG viewer 作為唯一版本歷程入口
+
+### Fixed
+- Tools 子群組在頁面初始化時被 `filterSkills('')` 隱藏的問題（`subVisible || !q` 修正）
+- `fetchLastUpdated` API 路徑錯誤（`/contents/.../commits` → `/commits?path=...`）
+- Tools section 預設折疊，點擊 header 展開；搜尋命中自動展開
+
+---
+
 ## [1.4.0] — 2026-05-13
 
 ### Added
@@ -73,7 +85,8 @@
 
 ---
 
-[Unreleased]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.1.0...v1.2.0

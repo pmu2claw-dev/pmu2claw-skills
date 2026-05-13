@@ -13,7 +13,7 @@
 
 🌐 **線上目錄：[https://pmu2claw-dev.github.io/pmu2claw-skills/](https://pmu2claw-dev.github.io/pmu2claw-skills/)**
 
-功能包含：即時搜尋（Skills / Tools / CHANGELOG 全範圍）、Skill 詳細說明、References 瀏覽、Tools 原始碼瀏覽與下載、修改歷程、相關 Skill 推薦。
+功能包含：即時搜尋（Skills / Tools / CHANGELOG 全範圍）、Skill 詳細說明、References 瀏覽、Tools 原始碼瀏覽與下載、CHANGELOG 瀏覽、相關 Skill 推薦。
 
 ---
 

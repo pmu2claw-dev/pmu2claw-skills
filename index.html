@@ -322,68 +322,6 @@
   }
   .readme-content a:hover { border-color: var(--accent2); background: rgba(121,192,255,0.08); }
 
-  /* ── Changelog section ── */
-  .changelog-section {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-    margin-bottom: 48px; overflow: hidden;
-  }
-  .changelog-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 24px; border-bottom: 1px solid var(--border);
-    background: var(--surface2); cursor: pointer;
-    transition: background 0.15s;
-  }
-  .changelog-header:hover { background: #21262d; }
-  .changelog-header-left { display: flex; align-items: center; gap: 10px; }
-  .changelog-chevron { color: var(--text-dim); font-size: 0.85rem; transition: transform 0.2s; }
-  .changelog-chevron.open { transform: rotate(180deg); }
-  .changelog-content { padding: 8px 0; display: none; }
-  .changelog-content.open { display: block; }
-  .commit-item {
-    display: flex; align-items: flex-start; gap: 14px;
-    padding: 14px 24px; border-bottom: 1px solid var(--border);
-    transition: background 0.12s;
-  }
-  .commit-item:last-child { border-bottom: none; }
-  .commit-item:hover { background: var(--surface2); }
-  .commit-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--accent3); flex-shrink: 0; margin-top: 5px;
-    border: 2px solid var(--bg);
-    box-shadow: 0 0 0 1px var(--accent3);
-  }
-  .commit-body { flex: 1; min-width: 0; }
-  .commit-msg { font-size: 0.88rem; color: var(--text); font-weight: 500; word-break: break-word; }
-  .commit-msg .commit-type {
-    display: inline-block; border-radius: 4px; font-size: 0.72rem;
-    padding: 1px 7px; margin-right: 7px; font-weight: 600; font-family: monospace;
-  }
-  .type-feat  { background: #12261e; color: var(--accent3); }
-  .type-fix   { background: #2a1215; color: var(--accent); }
-  .type-docs  { background: #0d2036; color: var(--accent2); }
-  .type-refactor { background: #1c1536; color: var(--accent4); }
-  .type-chore { background: var(--tag-bg); color: var(--text-dim); }
-  .commit-meta { display: flex; align-items: center; gap: 10px; margin-top: 5px; flex-wrap: wrap; }
-  .commit-sha {
-    font-family: monospace; font-size: 0.75rem; color: var(--accent2);
-    background: var(--tag-bg); border-radius: 4px; padding: 1px 6px;
-    text-decoration: none;
-  }
-  .commit-sha:hover { text-decoration: underline; }
-  .commit-date { font-size: 0.75rem; color: var(--text-dim); }
-  .commit-author { font-size: 0.75rem; color: var(--text-dim); }
-  .changelog-load-more {
-    text-align: center; padding: 14px;
-    border-top: 1px solid var(--border);
-  }
-  .load-more-btn {
-    background: var(--tag-bg); border: 1px solid var(--border); border-radius: 6px;
-    color: var(--text-dim); cursor: pointer; font-size: 0.82rem; padding: 6px 18px;
-    transition: all 0.15s;
-  }
-  .load-more-btn:hover { color: var(--text); border-color: #4d565e; }
-  .load-more-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
   /* ── Footer ── */
   footer {
     border-top: 1px solid var(--border); text-align: center;
@@ -954,20 +892,6 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
 </div>
 
-<!-- ══ Changelog Section ══ -->
-<div class="changelog-section">
-  <div class="changelog-header" onclick="toggleChangelog()">
-    <div class="changelog-header-left">
-      <span>🕐</span>
-      <span class="readme-header-title">修改歷程</span>
-      <span class="readme-header-sub" id="changelog-count"></span>
-    </div>
-    <span class="changelog-chevron" id="changelog-chevron">▼</span>
-  </div>
-  <div class="changelog-content" id="changelog-content">
-    <div class="loading-state"><div class="spinner"></div>載入 commits…</div>
-  </div>
-</div>
 
 </main>
 
@@ -1593,85 +1517,7 @@ function renderChangelog2(text, highlight) {
     `<a href="https://github.com/${REPO}/blob/main/CHANGELOG.md" target="_blank">在 GitHub 上查看 CHANGELOG ↗</a>`;
 }
 
-// ── Changelog ──
-let changelogLoaded = false;
-let changelogOpen   = false;
-let commitPage      = 1;
-let allCommits      = [];
-const PER_PAGE      = 10;
 
-function toggleChangelog() {
-  changelogOpen = !changelogOpen;
-  const content = document.getElementById('changelog-content');
-  const chevron = document.getElementById('changelog-chevron');
-  content.classList.toggle('open', changelogOpen);
-  chevron.classList.toggle('open', changelogOpen);
-  if (changelogOpen && !changelogLoaded) loadChangelog();
-}
-
-async function loadChangelog() {
-  const el = document.getElementById('changelog-content');
-  try {
-    const res = await fetch(`${API}/commits?per_page=30`);
-    if (!res.ok) throw new Error(res.status);
-    allCommits = await res.json();
-    changelogLoaded = true;
-    document.getElementById('changelog-count').textContent =
-      `${allCommits.length} 個 commit`;
-    renderCommits(el);
-  } catch(e) {
-    el.innerHTML = `<div class="loading-state" style="color:var(--accent)">⚠ 無法載入（${e.message}）</div>`;
-  }
-}
-
-function commitTypeTag(msg) {
-  const m = msg.match(/^(feat|fix|docs|refactor|chore|test|style|perf|ci|build)(\(.+?\))?:/);
-  if (!m) return '';
-  const t = m[1];
-  const cls = ['feat','fix','docs','refactor'].includes(t) ? `type-${t}` : 'type-chore';
-  return `<span class="commit-type ${cls}">${t}</span>`;
-}
-
-function commitMsgBody(msg) {
-  const tag = commitTypeTag(msg);
-  const body = msg.replace(/^(feat|fix|docs|refactor|chore|test|style|perf|ci|build)(\(.+?\))?:\s*/, '');
-  return tag + body;
-}
-
-function renderCommits(el) {
-  const shown = allCommits.slice(0, commitPage * PER_PAGE);
-  const hasMore = shown.length < allCommits.length;
-  el.innerHTML = shown.map(c => {
-    const sha   = c.sha.slice(0, 7);
-    const date  = c.commit.author.date.slice(0, 10);
-    const msg   = c.commit.message.split('\n')[0];
-    const author = c.commit.author.name;
-    const url   = `https://github.com/${REPO}/commit/${c.sha}`;
-    return `
-      <div class="commit-item">
-        <div class="commit-dot"></div>
-        <div class="commit-body">
-          <div class="commit-msg">${commitMsgBody(msg)}</div>
-          <div class="commit-meta">
-            <a class="commit-sha" href="${url}" target="_blank">${sha}</a>
-            <span class="commit-date">${date}</span>
-            <span class="commit-author">by ${author}</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('') + (hasMore ? `
-    <div class="changelog-load-more">
-      <button class="load-more-btn" onclick="loadMoreCommits()">載入更多</button>
-    </div>
-  ` : '');
-}
-
-function loadMoreCommits() {
-  commitPage++;
-  const el = document.getElementById('changelog-content');
-  renderCommits(el);
-}
 </script>
 </body>
 </html>
