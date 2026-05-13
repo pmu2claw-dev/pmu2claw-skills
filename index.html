@@ -944,7 +944,7 @@ function switchTab(btn, id) {
 
 // ── Copy install ──
 function copyInstall(btn, slug) {
-  const text = `hermes skills install ${RAW}/${slug}/SKILL.md`;
+  const text = `${RAW}/${slug}/SKILL.md`;
   navigator.clipboard.writeText(text).then(() => {
     btn.textContent = '✓ 已複製';
     btn.classList.add('copied');
