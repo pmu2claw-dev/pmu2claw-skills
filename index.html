@@ -1215,6 +1215,30 @@ function filterSkills(q) {
     if (toolsSectionVisible) anyVisible = true;
   }
 
+  // CHANGELOG
+  const clSection = document.getElementById('changelog2-content')?.closest('.readme-section');
+  if (clSection) {
+    if (!q) {
+      // 搜尋清空：收合、移除高亮
+      clSection.style.outline = '';
+      if (changelog2Loaded) renderChangelog2(changelog2Text);
+    } else {
+      const clMatch = changelog2Text && changelog2Text.toLowerCase().includes(q);
+      if (clMatch) {
+        anyVisible = true;
+        // 自動展開
+        if (!changelog2Open) toggleChangelog2();
+        // 高亮
+        if (changelog2Loaded) renderChangelog2(changelog2Text, q);
+        // 加外框提示
+        clSection.style.outline = '1px solid var(--accent)';
+      } else {
+        clSection.style.outline = '';
+        if (changelog2Loaded) renderChangelog2(changelog2Text);
+      }
+    }
+  }
+
   document.getElementById('search-empty').style.display = (!q || anyVisible) ? 'none' : '';
 }
 
@@ -1510,18 +1534,34 @@ function toggleChangelog2() {
   if (changelog2Open && !changelog2Loaded) loadChangelog2();
 }
 
+let changelog2Text = '';  // raw text cache for search
+
 async function loadChangelog2() {
   const el = document.getElementById('changelog2-content');
   try {
     const res = await fetch(`${RAW}/CHANGELOG.md`);
     if (!res.ok) throw new Error(res.status);
     const text = await res.text();
+    changelog2Text = text;
     changelog2Loaded = true;
-    el.innerHTML = renderMd(text, null) +
-      `<a href="https://github.com/${REPO}/blob/main/CHANGELOG.md" target="_blank">在 GitHub 上查看 CHANGELOG ↗</a>`;
+    renderChangelog2(text);
   } catch(e) {
     el.innerHTML = `<div class="loading-state" style="color:var(--accent)">⚠ 無法載入 CHANGELOG（${e.message}）</div>`;
   }
+}
+
+function renderChangelog2(text, highlight) {
+  const el = document.getElementById('changelog2-content');
+  let html = renderMd(text, null);
+  if (highlight) {
+    const esc = highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    html = html.replace(
+      new RegExp(`(${esc})`, 'gi'),
+      '<mark style="background:rgba(247,129,102,0.35);color:var(--text);border-radius:2px;padding:0 1px">$1</mark>'
+    );
+  }
+  el.innerHTML = html +
+    `<a href="https://github.com/${REPO}/blob/main/CHANGELOG.md" target="_blank">在 GitHub 上查看 CHANGELOG ↗</a>`;
 }
 
 // ── Changelog ──
