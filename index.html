@@ -1012,10 +1012,27 @@ function openSkill(slug, name, icon) {
   document.getElementById('panel-slug').textContent  = slug;
   document.getElementById('ptab-skill').classList.add('active');
   document.getElementById('ptab-refs').classList.remove('active');
+  document.getElementById('ptab-refs').style.display = '';  // reset
   document.getElementById('overlay').classList.add('open');
   document.getElementById('panel').classList.add('open');
   document.body.style.overflow = 'hidden';
   loadSkillMd(slug);
+  checkRefsTab(slug);
+}
+
+async function checkRefsTab(slug) {
+  if (cache[slug]?.refsChecked !== undefined) {
+    document.getElementById('ptab-refs').style.display = cache[slug].refsChecked ? '' : 'none';
+    return;
+  }
+  try {
+    const res = await fetch(`${API}/${slug}/references`);
+    const hasRefs = res.status !== 404;
+    if (!cache[slug]) cache[slug] = {};
+    cache[slug].refsChecked = hasRefs;
+    if (currentSlug === slug)
+      document.getElementById('ptab-refs').style.display = hasRefs ? '' : 'none';
+  } catch { /* 網路錯誤保留 tab 可見 */ }
 }
 
 function closePanel() {
