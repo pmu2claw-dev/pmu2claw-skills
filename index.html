@@ -1012,27 +1012,13 @@ function openSkill(slug, name, icon) {
   document.getElementById('panel-slug').textContent  = slug;
   document.getElementById('ptab-skill').classList.add('active');
   document.getElementById('ptab-refs').classList.remove('active');
-  document.getElementById('ptab-refs').style.display = '';  // reset
+  // 從快取決定 refs tab 是否顯示，未知則先顯示（loadRefs 會在 404 時隱藏）
+  const refsKnown = cache[slug]?.refsChecked;
+  document.getElementById('ptab-refs').style.display = refsKnown === false ? 'none' : '';
   document.getElementById('overlay').classList.add('open');
   document.getElementById('panel').classList.add('open');
   document.body.style.overflow = 'hidden';
   loadSkillMd(slug);
-  checkRefsTab(slug);
-}
-
-async function checkRefsTab(slug) {
-  if (cache[slug]?.refsChecked !== undefined) {
-    document.getElementById('ptab-refs').style.display = cache[slug].refsChecked ? '' : 'none';
-    return;
-  }
-  try {
-    const res = await fetch(`${API}/${slug}/references`);
-    const hasRefs = res.status !== 404;
-    if (!cache[slug]) cache[slug] = {};
-    cache[slug].refsChecked = hasRefs;
-    if (currentSlug === slug)
-      document.getElementById('ptab-refs').style.display = hasRefs ? '' : 'none';
-  } catch { /* 網路錯誤保留 tab 可見 */ }
 }
 
 function closePanel() {
@@ -1088,7 +1074,10 @@ async function loadRefs(slug) {
   try {
     const res = await fetch(`${API}/${slug}/references`);
     if (res.status === 404) {
-      body.innerHTML = '<div class="loading-state" style="color:var(--text-dim)">此 skill 無 references 目錄</div>';
+      if (!cache[slug]) cache[slug] = {};
+      cache[slug].refsChecked = false;
+      if (currentSlug === slug)
+        document.getElementById('ptab-refs').style.display = 'none';
       return;
     }
     if (!res.ok) throw new Error(res.status);
@@ -1098,6 +1087,7 @@ async function loadRefs(slug) {
       .map(f => ({ name: f.name, url: f.download_url }));
     if (!cache[slug]) cache[slug] = {};
     cache[slug].refs = refs;
+    cache[slug].refsChecked = true;
     renderRefList(refs);
   } catch(e) {
     body.innerHTML = `<div class="loading-state" style="color:var(--accent)">⚠ 無法載入 references（${e.message}）</div>`;
