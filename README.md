@@ -10,7 +10,9 @@
 
 這個 repo 收錄針對 Fitipower IC 測試自動化設計的 AI Skill，可用於 OpenClaw、Hermes、Claude Code 等 agent 平台。
 
-**📦 [查看完整 Skill 目錄 →](https://pmu2claw-dev.github.io/pmu2claw-skills/)**
+🌐 **線上目錄：[https://pmu2claw-dev.github.io/pmu2claw-skills/](https://pmu2claw-dev.github.io/pmu2claw-skills/)**
+
+功能包含：即時搜尋、Skill 詳細說明、References 瀏覽、修改歷程、相關 Skill 推薦。
 
 ---
 
