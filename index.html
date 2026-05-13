@@ -431,6 +431,42 @@
   }
   .related-chip:hover { border-color: var(--accent2); background: rgba(121,192,255,0.08); }
 
+
+  /* ── Tools Section ── */
+  .tools-section { margin-bottom: 52px; }
+  .tools-subgroup { margin-bottom: 32px; }
+  .tools-subgroup-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 14px;
+  }
+  .tools-subgroup-title { font-size: 0.88rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+  .tools-subgroup-count { background: var(--tag-bg); border: 1px solid var(--border); border-radius: 10px; font-size: 0.72rem; color: var(--text-dim); padding: 1px 8px; }
+
+  .tool-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; display: flex; flex-direction: column; gap: 10px;
+    cursor: pointer; transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .tool-card:hover { border-color: var(--accent3); box-shadow: 0 4px 16px rgba(86,211,100,0.1); }
+  .tool-card-top { display: flex; align-items: flex-start; gap: 10px; }
+  .tool-card-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+  .tool-card-name { font-size: 0.88rem; font-weight: 700; color: var(--text); font-family: 'SFMono-Regular', Consolas, monospace; word-break: break-all; }
+  .tool-card-desc { font-size: 0.82rem; color: var(--text-dim); flex: 1; min-height: 2.5em; }
+  .tool-card-footer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+  .tag-py   { background: #0d2036; border-color: #1f6feb40; color: var(--accent2); }
+  .tag-toml { background: #1c1536; border-color: #8b5cf640; color: var(--accent4); }
+  .dl-btn {
+    margin-left: auto; background: var(--tag-bg); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--accent3); cursor: pointer; font-size: 0.74rem;
+    padding: 4px 10px; transition: all 0.15s; white-space: nowrap; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .dl-btn:hover { border-color: var(--accent3); background: rgba(86,211,100,0.08); }
+  .tool-updated { font-size: 0.72rem; color: var(--text-dim); display: flex; align-items: center; gap: 4px; }
+  .tool-updated .upd-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent3); }
+
+  .tools-loading { padding: 28px; text-align: center; color: var(--text-dim); font-size: 0.85rem; }
+
   /* ── Responsive ── */
   @media (max-width: 600px) {
     header h1 { font-size: 1.4rem; }
@@ -821,6 +857,50 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
 </div>
 
+
+<!-- ══ Tools Section ══ -->
+<div class="tools-section" id="tools-section">
+  <div class="group-header">
+    <span class="group-icon">🔧</span>
+    <span class="group-title">Tools</span>
+    <span class="group-count" id="tools-total-count"></span>
+    <span style="margin-left:auto;font-size:0.78rem;color:var(--text-dim)">連動工具腳本 · 點擊查看原始碼</span>
+  </div>
+
+  <div class="tools-subgroup">
+    <div class="tools-subgroup-header">
+      <span>⚙️</span>
+      <span class="tools-subgroup-title">scripts</span>
+      <span class="tools-subgroup-count" id="cnt-scripts"></span>
+    </div>
+    <div class="grid" id="grid-scripts">
+      <div class="tools-loading"><div class="spinner" style="display:inline-block;margin-right:8px"></div>載入中…</div>
+    </div>
+  </div>
+
+  <div class="tools-subgroup">
+    <div class="tools-subgroup-header">
+      <span>📦</span>
+      <span class="tools-subgroup-title">tenji_pipeline <span style="font-size:0.72rem;opacity:.6">（Python package）</span></span>
+      <span class="tools-subgroup-count" id="cnt-pipeline"></span>
+    </div>
+    <div class="grid" id="grid-pipeline">
+      <div class="tools-loading"><div class="spinner" style="display:inline-block;margin-right:8px"></div>載入中…</div>
+    </div>
+  </div>
+
+  <div class="tools-subgroup">
+    <div class="tools-subgroup-header">
+      <span>🧪</span>
+      <span class="tools-subgroup-title">examples</span>
+      <span class="tools-subgroup-count" id="cnt-examples"></span>
+    </div>
+    <div class="grid" id="grid-examples">
+      <div class="tools-loading"><div class="spinner" style="display:inline-block;margin-right:8px"></div>載入中…</div>
+    </div>
+  </div>
+</div>
+
 <!-- ══ README Section ══ -->
 <div class="readme-section">
   <div class="readme-header" onclick="toggleReadme()">
@@ -1154,6 +1234,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSkillCount();
   filterSkills('');
   loadAllLastUpdated();
+  loadAllTools();
 });
 
 // Wrap openSkill to append related section
@@ -1193,6 +1274,179 @@ function renderMd(text, slug) {
   const html = marked.parse(stripped);
   return `<div class="md-body">${html}</div>`;
 }
+
+
+// ── Tools ──
+const TOOL_DIRS = [
+  { key: 'scripts',  path: 'tools/scripts',        grid: 'grid-scripts',  cnt: 'cnt-scripts'  },
+  { key: 'pipeline', path: 'tools/tenji_pipeline',  grid: 'grid-pipeline', cnt: 'cnt-pipeline' },
+  { key: 'examples', path: 'tools/examples',        grid: 'grid-examples', cnt: 'cnt-examples' },
+];
+
+const toolCache = {};  // path -> { files, content }
+
+async function loadAllTools() {
+  let total = 0;
+  await Promise.all(TOOL_DIRS.map(async ({ path, grid, cnt }) => {
+    try {
+      const res = await fetch(`${API}/${path}`);
+      if (!res.ok) throw new Error(res.status);
+      const files = await res.json();
+      toolCache[path] = { files };
+      document.getElementById(cnt).textContent = `${files.length} 支`;
+      total += files.length;
+      renderToolGrid(grid, files, path);
+    } catch(e) {
+      document.getElementById(grid).innerHTML =
+        `<div class="tools-loading" style="color:var(--accent)">⚠ 載入失敗 (${e.message})</div>`;
+    }
+  }));
+  const el = document.getElementById('tools-total-count');
+  if (el) el.textContent = `${total} 支工具`;
+}
+
+function fileIcon(name) {
+  if (name.endsWith('.py'))   return '🐍';
+  if (name.endsWith('.sh'))   return '📜';
+  if (name.endsWith('.toml')) return '⚙️';
+  return '📄';
+}
+
+function fileTag(name) {
+  if (name.endsWith('.py'))   return '<span class="tag tag-py">Python</span>';
+  if (name.endsWith('.sh'))   return '<span class="tag">Shell</span>';
+  if (name.endsWith('.toml')) return '<span class="tag tag-toml">TOML</span>';
+  return '';
+}
+
+// 從前幾行抽 docstring 第一行
+function extractDesc(content) {
+  if (!content) return '';
+  const m = content.match(/"""\s*\n?([^\n"]{5,120})/);
+  if (m) return m[1].trim();
+  const m2 = content.match(/^#[^!][^\n]{4,100}/m);
+  if (m2) return m2[0].replace(/^#\s*/, '').trim();
+  return '';
+}
+
+function renderToolGrid(gridId, files, dirPath) {
+  const grid = document.getElementById(gridId);
+  if (!files.length) { grid.innerHTML = '<div class="tools-loading">（無檔案）</div>'; return; }
+  grid.innerHTML = files.map(f => {
+    const rawUrl = `${RAW}/${dirPath}/${f.name}`;
+    const icon   = fileIcon(f.name);
+    const tag    = fileTag(f.name);
+    return `
+      <div class="tool-card" onclick="openTool('${dirPath}','${f.name}','${rawUrl}')">
+        <div class="tool-card-top">
+          <span class="tool-card-icon">${icon}</span>
+          <div>
+            <div class="tool-card-name">${f.name}</div>
+            <div class="tool-card-desc" id="tdesc-${dirPath.replace(/\//g,'-')}-${f.name}">載入描述中…</div>
+          </div>
+        </div>
+        <div class="tool-card-footer">
+          ${tag}
+          <span class="tool-updated" id="tupd-${dirPath.replace(/\//g,'-')}-${f.name}"></span>
+          <button class="detail-btn" onclick="event.stopPropagation();openTool('${dirPath}','${f.name}','${rawUrl}')">查看原始碼 →</button>
+          <a class="dl-btn" href="${rawUrl}" download="${f.name}" target="_blank"
+             onclick="event.stopPropagation()">⬇ 下載</a>
+        </div>
+      </div>
+    `;
+  }).join('');
+  // 非同步抓描述 + last updated
+  files.forEach(f => fetchToolMeta(dirPath, f.name, f.download_url));
+}
+
+async function fetchToolMeta(dirPath, name, downloadUrl) {
+  const key = dirPath.replace(/\//g,'-') + '-' + name;
+  // description
+  try {
+    const res = await fetch(downloadUrl);
+    if (res.ok) {
+      const text = await res.text();
+      if (!toolCache[dirPath]) toolCache[dirPath] = {};
+      if (!toolCache[dirPath].content) toolCache[dirPath].content = {};
+      toolCache[dirPath].content[name] = text;
+      const desc = extractDesc(text);
+      const el = document.getElementById(`tdesc-${key}`);
+      if (el) el.textContent = desc || '—';
+    }
+  } catch {}
+  // last updated
+  try {
+    const res2 = await fetch(`${API}/${dirPath}/${name}/commits?per_page=1`);
+    if (res2.ok) {
+      const data = await res2.json();
+      if (data.length) {
+        const d = data[0].commit.author.date.slice(0,10);
+        const el = document.getElementById(`tupd-${key}`);
+        if (el) el.innerHTML = `<span class="upd-dot"></span>${d}`;
+      }
+    }
+  } catch {}
+}
+
+// 在 detail panel 開啟工具原始碼
+function openTool(dirPath, name, rawUrl) {
+  currentSlug = null;
+  document.getElementById('panel-title').textContent = fileIcon(name) + ' ' + name;
+  document.getElementById('panel-slug').textContent  = dirPath + '/' + name;
+  document.getElementById('ptab-skill').textContent  = '📄 原始碼';
+  document.getElementById('ptab-refs').style.display = 'none';
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const body = document.getElementById('panel-body');
+  // 若已快取
+  if (toolCache[dirPath]?.content?.[name]) {
+    body.innerHTML = renderToolSource(name, toolCache[dirPath].content[name], rawUrl);
+    return;
+  }
+  body.innerHTML = `<div class="loading-state"><div class="spinner"></div>載入 ${name}…</div>`;
+  fetch(rawUrl).then(r => r.text()).then(text => {
+    if (!toolCache[dirPath]) toolCache[dirPath] = {};
+    if (!toolCache[dirPath].content) toolCache[dirPath].content = {};
+    toolCache[dirPath].content[name] = text;
+    body.innerHTML = renderToolSource(name, text, rawUrl);
+    // update desc card if not yet set
+    const key = dirPath.replace(/\//g,'-') + '-' + name;
+    const el = document.getElementById(`tdesc-${key}`);
+    if (el && (el.textContent === '載入描述中…' || el.textContent === '')) {
+      el.textContent = extractDesc(text) || '—';
+    }
+  }).catch(e => {
+    body.innerHTML = `<div class="loading-state" style="color:var(--accent)">⚠ 載入失敗（${e.message}）</div>`;
+  });
+}
+
+function renderToolSource(name, text, rawUrl) {
+  const ext  = name.split('.').pop();
+  const lang = ext === 'py' ? 'python' : ext === 'sh' ? 'bash' : ext;
+  const lines = text.split('\n').length;
+  const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <span style="font-family:monospace;font-size:0.82rem;color:var(--accent2);">${name}</span>
+      <span class="tag">${lines} 行</span>
+      <a class="dl-btn" href="${rawUrl}" target="_blank" download="${name}" style="margin-left:auto">⬇ 下載</a>
+      <a class="detail-btn" href="${rawUrl}" target="_blank" style="text-decoration:none">在 GitHub 查看 ↗</a>
+    </div>
+    <div class="md-body">
+      <pre><code>${escaped}</code></pre>
+    </div>
+  `;
+}
+
+// 關閉 panel 時重置 tab 標籤
+const _origClosePanel = window.closePanel;
+window.closePanel = function() {
+  _origClosePanel();
+  document.getElementById('ptab-skill').textContent = '📄 SKILL.md';
+  document.getElementById('ptab-refs').style.display = '';
+};
 
 // ── README ──
 let readmeLoaded = false;
