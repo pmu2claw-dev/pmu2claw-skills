@@ -8,6 +8,18 @@
 
 ---
 
+## [1.2.0] — 2026-05-13
+
+### Added
+- **`tools/` 目錄**：新增 30 支連動工具腳本
+  - `tools/scripts/`（15 支）：核心自動化腳本，含 `sheet_classifier.py`、`mode_expander.py`、`bootstrap_family.py`、`compile_tenji.py`、`generate_excel.py`、`spec_validator.py`、`spec_normalizer.py`、`ai_parser.py`、`template_reader.py`、`build_sa_index.py`、`auto_repair_spec.py`、`memory_loader.py`、`memory_rules.py`、`feedback_processor.py`、`verify_visual_integrity.py`
+  - `tools/tenji_pipeline/`（8 支）：可 `pip install` 的 Python package，含 `convert_single_item`、`validate_single_item`、`assemble_workbook`、`verify_workbook` 四個 CLI 入口
+  - `tools/examples/`（7 支）：JD6628H 單電源與盲插模式的產生腳本範例
+- **`index.html` Tools 區塊**：動態載入三個子群組的工具卡片，含 docstring 描述、last updated 時間、原始碼查看 Panel、一鍵下載
+- **README.md**：新增 `🔧 Tools` 章節，含目錄結構與 pip 安裝說明；新增 tools badge
+
+---
+
 ## [1.1.0] — 2026-05-13
 
 ### Added
@@ -37,6 +49,7 @@
 
 ---
 
-[Unreleased]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/releases/tag/v1.0.0

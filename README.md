@@ -6,13 +6,14 @@
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-79c0ff?style=flat-square)](https://github.com/pmu2claw-dev/openclaw-skill)
 [![Hermes](https://img.shields.io/badge/Hermes-compatible-79c0ff?style=flat-square)](https://github.com/pmu2claw-dev/hermes-agent-skill)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-compatible-d2a8ff?style=flat-square)](https://claude.ai/code)
+[![Tools](https://img.shields.io/badge/tools-30-f78166?style=flat-square)](tools/)
 [![License](https://img.shields.io/badge/license-MIT-8b949e?style=flat-square)](LICENSE)
 
 這個 repo 收錄針對 Fitipower IC 測試自動化設計的 AI Skill，可用於 OpenClaw、Hermes、Claude Code 等 agent 平台。
 
 🌐 **線上目錄：[https://pmu2claw-dev.github.io/pmu2claw-skills/](https://pmu2claw-dev.github.io/pmu2claw-skills/)**
 
-功能包含：即時搜尋、Skill 詳細說明、References 瀏覽、修改歷程、相關 Skill 推薦。
+功能包含：即時搜尋、Skill 詳細說明、References 瀏覽、Tools 原始碼瀏覽與下載、修改歷程、相關 Skill 推薦。
 
 ---
 
@@ -110,6 +111,47 @@ jd6628h-*-analysis → tenji-sa-plan-intake → sa-plan-to-mother-template-mappi
 │   └── ...
 └── scripts/          # 輔助腳本（可選）
     └── *.py
+```
+
+---
+
+## 🔧 Tools
+
+連動工具腳本，與 Skills 協同使用：
+
+```
+tools/
+├── scripts/          # 核心自動化腳本（15 支）
+│   ├── sheet_classifier.py    # SA workbook OOXML 分類
+│   ├── mode_expander.py       # SA mode-matrix → TENJI test_items
+│   ├── bootstrap_family.py    # 無 ANS 時從 SA 產生 spec.json
+│   ├── compile_tenji.py       # parse → normalize → validate → Excel
+│   ├── generate_excel.py      # 複製 .xlsm 模板填入資料
+│   ├── spec_validator.py      # family rules 驗證
+│   ├── spec_normalizer.py     # 統一 spec 格式
+│   ├── ai_parser.py           # 自然語言 → TENJI spec JSON
+│   ├── template_reader.py     # 讀取 TENJI Excel 模板結構
+│   ├── build_sa_index.py      # 建立 SA workbook 索引
+│   ├── auto_repair_spec.py    # 自動修正常見驗證錯誤
+│   ├── memory_loader.py       # durable memory 載入
+│   ├── memory_rules.py        # memory-driven 驗證規則
+│   ├── feedback_processor.py  # feedback.jsonl → learned.md
+│   └── verify_visual_integrity.py
+├── tenji_pipeline/   # Python package（可 pip install，8 支）
+│   ├── convert_single_item.py
+│   ├── validate_single_item.py
+│   ├── assemble_workbook.py
+│   ├── verify_workbook.py
+│   ├── schema.py / common.py / __init__.py
+│   └── pyproject.toml
+└── examples/         # IC 專用產生腳本範例（7 支）
+    └── gen_jd6628h_*.py
+```
+
+安裝 `tenji_pipeline` package：
+
+```bash
+pip install ./tools/tenji_pipeline
 ```
 
 ---
