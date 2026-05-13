@@ -1024,6 +1024,15 @@ function openSkill(slug, name, icon) {
   document.getElementById('panel').classList.add('open');
   document.body.style.overflow = 'hidden';
   loadSkillMd(slug);
+  loadSkillLastUpdated(slug);
+}
+
+async function loadSkillLastUpdated(slug) {
+  const el = document.getElementById('upd-' + slug);
+  if (!el || el.innerHTML) return;  // 已載入過
+  const date = await fetchLastUpdated(slug);
+  if (date && document.getElementById('upd-' + slug))
+    document.getElementById('upd-' + slug).innerHTML = `<span class="upd-dot"></span>${date}`;
 }
 
 function closePanel() {
@@ -1290,8 +1299,7 @@ async function loadAllLastUpdated() {
 document.addEventListener('DOMContentLoaded', () => {
   updateSkillCount();
   filterSkills('');
-  loadAllLastUpdated();
-  loadAllTools();
+  loadAllTools();  // 3 API calls only (directory listings)
 });
 
 // Wrap openSkill to append related section
