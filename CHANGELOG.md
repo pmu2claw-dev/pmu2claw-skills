@@ -8,6 +8,20 @@
 
 ---
 
+## [1.4.0] — 2026-05-13
+
+### Added
+- **`tools/tenji_converter/`**：從 TIM2TENJI_skill 移入 5 支核心邏輯模組
+  - `gates.py`、`normalizer.py`、`repair.py`、`memory_loader.py`、`memory_rules.py`
+- **`protocol-knowledge/references/`**：協議大師知識庫完整快照（41 份文件）
+  - `official/`：AFC、Apple、BC1.2、FCP、PD、PE、PPS、QC、UFCS、USB-C Current、VOOC（12 份協議規格整理）
+  - `tenji-ready/`：20 份 Excel mapping 與 test-fields 對應表（可直接用於 TENJI 生成）
+  - `implementation/`：DP/DM legacy 決策樹、事件鏈、物理介面說明
+  - `benchmark/`：協議晶片對比表
+  - `INDEX.md`、`README.md`、`STATUS-MATRIX.md`
+
+---
+
 ## [1.3.0] — 2026-05-13
 
 ### Added
@@ -59,7 +73,8 @@
 
 ---
 
-[Unreleased]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.0.0...v1.1.0

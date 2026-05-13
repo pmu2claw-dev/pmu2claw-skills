@@ -6,7 +6,7 @@
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-79c0ff?style=flat-square)](https://github.com/pmu2claw-dev/openclaw-skill)
 [![Hermes](https://img.shields.io/badge/Hermes-compatible-79c0ff?style=flat-square)](https://github.com/pmu2claw-dev/hermes-agent-skill)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-compatible-d2a8ff?style=flat-square)](https://claude.ai/code)
-[![Tools](https://img.shields.io/badge/tools-30-f78166?style=flat-square)](tools/)
+[![Tools](https://img.shields.io/badge/tools-35-f78166?style=flat-square)](tools/)
 [![License](https://img.shields.io/badge/license-MIT-8b949e?style=flat-square)](LICENSE)
 
 這個 repo 收錄針對 Fitipower IC 測試自動化設計的 AI Skill，可用於 OpenClaw、Hermes、Claude Code 等 agent 平台。
@@ -121,6 +121,12 @@ jd6628h-*-analysis → tenji-sa-plan-intake → sa-plan-to-mother-template-mappi
 
 ```
 tools/
+├── tenji_converter/  # 轉換核心邏輯（5 支）
+│   ├── gates.py               # 協議 gate 判斷
+│   ├── normalizer.py          # spec 正規化
+│   ├── repair.py              # 自動修復常見錯誤
+│   ├── memory_loader.py       # durable memory 載入
+│   └── memory_rules.py        # memory-driven 驗證規則
 ├── scripts/          # 核心自動化腳本（15 支）
 │   ├── sheet_classifier.py    # SA workbook OOXML 分類
 │   ├── mode_expander.py       # SA mode-matrix → TENJI test_items
@@ -152,6 +158,23 @@ tools/
 
 ```bash
 pip install ./tools/tenji_pipeline
+```
+
+---
+
+## 📚 Protocol Knowledge Base
+
+`protocol-knowledge/references/` 收錄協議大師整理的快充協議知識庫：
+
+```
+protocol-knowledge/references/
+├── official/         # 協議規格整理（AFC/Apple/BC1.2/FCP/PD/PE/PPS/QC/UFCS/VOOC 等）
+├── tenji-ready/      # 20 份 Excel mapping + test-fields（可直接用於 TENJI 生成）
+├── implementation/   # DP/DM 決策樹、事件鏈、物理介面說明
+├── benchmark/        # 協議晶片對比表
+├── INDEX.md          # 知識庫入口
+├── README.md         # 結構說明
+└── STATUS-MATRIX.md  # 協議覆蓋狀態總表
 ```
 
 ---
