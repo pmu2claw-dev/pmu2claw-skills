@@ -8,6 +8,16 @@
 
 ---
 
+## [1.3.0] — 2026-05-13
+
+### Added
+- **搜尋範圍擴展**（`index.html`）
+  - Tools 卡片納入搜尋：工具名稱、docstring 描述、標籤均可搜尋；子群組與整個 Tools section 跟隨結果顯示/隱藏
+  - CHANGELOG viewer 納入搜尋：命中時自動展開、橘色高亮匹配文字、section 邊框標示；清空搜尋則收合還原
+  - 搜尋框 placeholder 與無結果提示更新，反映四個搜尋範圍（Skills、Tools、CHANGELOG）
+
+---
+
 ## [1.2.0] — 2026-05-13
 
 ### Added
@@ -49,7 +59,8 @@
 
 ---
 
-[Unreleased]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/pmu2claw-dev/pmu2claw-skills/releases/tag/v1.0.0
