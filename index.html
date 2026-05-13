@@ -836,6 +836,22 @@ cat tenji-workflow/SKILL.md | claude --print -</div>
   </div>
 </div>
 
+
+<!-- ══ CHANGELOG Section ══ -->
+<div class="readme-section">
+  <div class="readme-header" onclick="toggleChangelog2()">
+    <div class="readme-header-left">
+      <span>📝</span>
+      <span class="readme-header-title">CHANGELOG</span>
+      <span class="readme-header-sub">版本發布紀錄</span>
+    </div>
+    <span class="readme-chevron" id="changelog2-chevron">▼</span>
+  </div>
+  <div class="readme-content" id="changelog2-content">
+    <div class="loading-state"><div class="spinner"></div>載入 CHANGELOG…</div>
+  </div>
+</div>
+
 <!-- ══ Changelog Section ══ -->
 <div class="changelog-section">
   <div class="changelog-header" onclick="toggleChangelog()">
@@ -1202,6 +1218,34 @@ async function loadReadme() {
       `<a href="https://github.com/${REPO}#readme" target="_blank">在 GitHub 上查看 README ↗</a>`;
   } catch(e) {
     el.innerHTML = `<div class="loading-state" style="color:var(--accent)">⚠ 無法載入 README（${e.message}）</div>`;
+  }
+}
+
+
+// ── CHANGELOG viewer ──
+let changelog2Loaded = false;
+let changelog2Open   = false;
+
+function toggleChangelog2() {
+  changelog2Open = !changelog2Open;
+  const content = document.getElementById('changelog2-content');
+  const chevron = document.getElementById('changelog2-chevron');
+  content.classList.toggle('open', changelog2Open);
+  chevron.classList.toggle('open', changelog2Open);
+  if (changelog2Open && !changelog2Loaded) loadChangelog2();
+}
+
+async function loadChangelog2() {
+  const el = document.getElementById('changelog2-content');
+  try {
+    const res = await fetch(`${RAW}/CHANGELOG.md`);
+    if (!res.ok) throw new Error(res.status);
+    const text = await res.text();
+    changelog2Loaded = true;
+    el.innerHTML = renderMd(text, null) +
+      `<a href="https://github.com/${REPO}/blob/main/CHANGELOG.md" target="_blank">在 GitHub 上查看 CHANGELOG ↗</a>`;
+  } catch(e) {
+    el.innerHTML = `<div class="loading-state" style="color:var(--accent)">⚠ 無法載入 CHANGELOG（${e.message}）</div>`;
   }
 }
 
